@@ -5,6 +5,9 @@ on:
     paths:
       - 'supabase/migrations/**'
 
+permissions:
+  pull-requests: write
+
 jobs:
   preview:
     runs-on: ubuntu-latest
@@ -23,4 +26,21 @@ jobs:
         run: supabase link --project-ref $PROJECT_ID
 
       - name: Preview migrations (dry-run)
-        run: supabase db push --dry-run
+        id: preview
+        run: |
+          OUTPUT=$(supabase db push --dry-run 2>&1) || true
+          echo "migration_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "## Database Migration Preview
+
+          The following changes will be applied when this PR is merged:
+
+          \`\`\`
+          ${{ steps.preview.outputs.migration_output }}
+          \`\`\`"
