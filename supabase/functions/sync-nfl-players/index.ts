@@ -7,9 +7,6 @@ import type {
   SleeperPlayer
 } from './types.ts';
 import {
-  isFantasyPosition
-} from './types.ts';
-import {
   SLEEPER_API_URL,
   BATCH_SIZE,
   REQUEST_TIMEOUT_MS
@@ -37,21 +34,16 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Respons
 }
 
 /**
- * Filters and transforms Sleeper API players to active fantasy players
+ * Transforms Sleeper API players to database insert format
+ * Only filters out players without a name (placeholder entries)
  * @param playersObj - Sleeper API response object
- * @returns Array of filtered players ready for database insert
+ * @returns Array of players ready for database insert
  */
-function filterActivePlayers(playersObj: SleeperPlayersResponse): NFLPlayerInsert[] {
+function transformPlayers(playersObj: SleeperPlayersResponse): NFLPlayerInsert[] {
   return Object.entries(playersObj)
     .map(([_, player]) => player)
-    .filter((player): player is Required<Pick<SleeperPlayer,
-      'player_id' | 'full_name' | 'position' | 'team'
-    >> & SleeperPlayer => {
-      return (
-        player.full_name !== null &&
-        player.team !== null &&
-        isFantasyPosition(player.position)
-      );
+    .filter((player): player is SleeperPlayer & { full_name: string } => {
+      return player.full_name !== null;
     })
     .map((player) => ({
       player_id: player.player_id,
@@ -114,15 +106,15 @@ Deno.serve(async (req: Request) => {
     const playersData: SleeperPlayersResponse = await sleeperResponse.json();
     console.log(`Fetched ${Object.keys(playersData).length} total players`);
 
-    // 3. Filter to active fantasy players
-    const activePlayers = filterActivePlayers(playersData);
-    console.log(`Filtered to ${activePlayers.length} active fantasy players`);
+    // 3. Transform players for database insert
+    const players = transformPlayers(playersData);
+    console.log(`Transformed ${players.length} players with valid names`);
 
-    if (activePlayers.length === 0) {
+    if (players.length === 0) {
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'No active players to sync',
+          message: 'No players to sync',
           playersProcessed: 0
         }),
         {
@@ -133,7 +125,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // 4. Batch upsert to Supabase
-    const batches = batchArray(activePlayers, BATCH_SIZE);
+    const batches = batchArray(players, BATCH_SIZE);
     console.log(`Upserting in ${batches.length} batch(es)...`);
 
     let totalUpserted = 0;
@@ -164,7 +156,7 @@ Deno.serve(async (req: Request) => {
     const response = {
       success: errors.length === 0,
       playersProcessed: totalUpserted,
-      totalPlayers: activePlayers.length,
+      totalPlayers: players.length,
       batchesProcessed: batches.length,
       errors: errors.length > 0 ? errors : undefined,
       durationMs: duration,
