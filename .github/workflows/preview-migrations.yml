@@ -30,18 +30,31 @@ jobs:
         id: preview
         run: |
           OUTPUT=$(supabase db push --dry-run 2>&1) || true
-          echo "migration_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$OUTPUT" >> $GITHUB_OUTPUT
+
+          # Extract migration filenames from output
+          MIGRATIONS=$(echo "$OUTPUT" | grep -oP '• \K.*\.sql' || true)
+
+          # Build comment body with SQL contents
+          BODY="## Database Migration Preview"$'\n\n'
+
+          if [ -z "$MIGRATIONS" ]; then
+            BODY+="No pending migrations."
+          else
+            BODY+="The following changes will be applied when this PR is merged:"$'\n\n'
+            for file in $MIGRATIONS; do
+              BODY+="### \`$file\`"$'\n'
+              BODY+="\`\`\`sql"$'\n'
+              BODY+="$(cat supabase/migrations/$file)"$'\n'
+              BODY+="\`\`\`"$'\n\n'
+            done
+          fi
+
+          echo "comment_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Comment on PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "## Database Migration Preview
-
-          The following changes will be applied when this PR is merged:
-
-          \`\`\`
-          ${{ steps.preview.outputs.migration_output }}
-          \`\`\`"
+          gh pr comment ${{ github.event.pull_request.number }} --body "${{ steps.preview.outputs.comment_body }}"
