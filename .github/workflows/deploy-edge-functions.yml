@@ -1,0 +1,55 @@
+name: Deploy Edge Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/functions/**'
+  workflow_dispatch:
+    inputs:
+      function_name:
+        description: 'Function to deploy (leave empty for all)'
+        required: false
+        type: string
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.changes.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed functions
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.function_name }}" ]; then
+            echo "functions=[\"${{ inputs.function_name }}\"]" >> $GITHUB_OUTPUT
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- supabase/functions/ | \
+              grep -oP 'supabase/functions/\K[^/]+' | sort -u | jq -R -s -c 'split("\n") | map(select(. != ""))')
+            echo "functions=$CHANGED" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.functions != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        function: ${{ fromJson(needs.detect-changes.outputs.functions) }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_ID: fnphwakozzgoqpoidpvq
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy ${{ matrix.function }}
+        run: supabase functions deploy ${{ matrix.function }} --project-ref $PROJECT_ID
