@@ -15,20 +15,12 @@ export type SleeperPlayersResponse = {
   [playerId: string]: SleeperPlayer;
 };
 
-// Valid fantasy positions
-export type FantasyPosition = 'QB' | 'RB' | 'WR' | 'TE';
-
-// Type guard to check if position is a valid fantasy position
-export function isFantasyPosition(pos: string | null): pos is FantasyPosition {
-  return pos !== null && ['QB', 'RB', 'WR', 'TE'].includes(pos);
-}
-
-// Filtered player ready for database insert
+// Player ready for database insert
 export interface NFLPlayerInsert {
   player_id: number;
   full_name: string;
-  position: FantasyPosition;
-  team: string;
+  position: string | null;
+  team: string | null;
   college: string | null;
   age: number | null;
   weight: number | null;
