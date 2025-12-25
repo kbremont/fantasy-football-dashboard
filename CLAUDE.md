@@ -11,6 +11,8 @@ Fantasy Football Dashboard is a data pipeline and analytics application that syn
 - TypeScript/Deno (Edge Functions runtime)
 - Sleeper API (fantasy football data source)
 - GitHub Actions (CI/CD)
+- Vite + React + TypeScript (Frontend)
+- shadcn/ui + Tailwind CSS (UI Components)
 
 **Project ID:** fnphwakozzgoqpoidpvq
 **Supabase URL:** https://fnphwakozzgoqpoidpvq.supabase.co
@@ -121,6 +123,81 @@ supabase gen types typescript --project-id fnphwakozzgoqpoidpvq > src/types/data
 # Link to remote Supabase project
 supabase link --project-ref fnphwakozzgoqpoidpvq
 ```
+
+## Frontend Application
+
+The frontend is a Vite + React + TypeScript SPA with shadcn/ui components and Tailwind CSS.
+
+### Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Frontend Structure
+
+```
+src/
+├── components/
+│   ├── ui/              # shadcn/ui components (Table, Card, Select, Button, Tabs)
+│   └── Layout.tsx       # App shell with navigation header
+├── pages/
+│   ├── Standings.tsx    # League standings with W-L records
+│   └── Matchups.tsx     # Weekly matchup results
+├── lib/
+│   ├── supabase.ts      # Supabase client (uses publishable key)
+│   └── utils.ts         # shadcn/ui utility (cn function)
+├── types/
+│   └── database.ts      # Auto-generated Supabase types
+├── App.tsx              # React Router setup
+├── main.tsx             # Entry point
+└── index.css            # Tailwind + custom theme
+```
+
+### Pages
+
+**Standings (`/`)**
+- Displays league standings with W-L-T records
+- Season selector dropdown
+- Calculates wins/losses from matchups table
+- Shows Points For, Points Against, Point Differential
+- Tracks winning/losing streaks
+- Podium-style highlighting for top 3 teams
+
+**Matchups (`/matchups`)**
+- Displays weekly head-to-head matchup results
+- Week navigation with scrollable pills
+- Season selector dropdown
+- Scoreboard-style cards with VS divider
+- Winner highlighted with crown icon
+
+### Environment Variables
+
+Create `.env` in project root:
+
+```env
+VITE_SUPABASE_URL=https://fnphwakozzgoqpoidpvq.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+The publishable key (not anon key) is used for client-side access. Get it from Supabase Dashboard > Settings > API.
+
+### Design System
+
+- **Theme**: Dark sports-editorial with navy background
+- **Fonts**: Bebas Neue (display), DM Sans (body)
+- **Colors**: Primary green (wins), Destructive red (losses), Gold accent
+- **Effects**: Gradient backgrounds, glow effects, fade-up animations
 
 ## Edge Functions Architecture
 

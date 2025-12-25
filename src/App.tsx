@@ -1,0 +1,19 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Layout } from '@/components/Layout'
+import { Standings } from '@/pages/Standings'
+import { Matchups } from '@/pages/Matchups'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Standings />} />
+          <Route path="/matchups" element={<Matchups />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+export default App
