@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, authReady } from '@/lib/supabase'
 import {
   calculatePowerRankings,
   getSummaryStats,
@@ -71,6 +71,8 @@ export function PowerRankings() {
   // Fetch seasons on mount
   useEffect(() => {
     async function fetchSeasons() {
+      await authReady
+
       const { data, error } = await supabase
         .from('seasons')
         .select('id, season_year, is_current')

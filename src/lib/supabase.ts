@@ -10,10 +10,13 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 
-// Auto sign-in anonymously if not authenticated
-// This gives users the 'authenticated' role for RLS without requiring login
-supabase.auth.getSession().then(({ data: { session } }) => {
-  if (!session) {
-    supabase.auth.signInAnonymously()
-  }
+// Promise that resolves when auth is ready
+// Pages should await this before making queries to avoid race conditions
+export const authReady = new Promise<void>((resolve) => {
+  supabase.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) {
+      await supabase.auth.signInAnonymously()
+    }
+    resolve()
+  })
 })

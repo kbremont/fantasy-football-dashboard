@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, authReady } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
@@ -53,6 +53,8 @@ export function Standings() {
   // Fetch seasons on mount
   useEffect(() => {
     async function fetchSeasons() {
+      await authReady
+
       const { data, error } = await supabase
         .from('seasons')
         .select('id, season_year, is_current')
