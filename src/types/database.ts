@@ -50,11 +50,37 @@ export type Database = {
         }
         Relationships: []
       }
+      rosters: {
+        Row: {
+          created_at: string | null
+          owner_id: string
+          roster_id: number
+          team_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          owner_id: string
+          roster_id: number
+          team_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          owner_id?: string
+          roster_id?: number
+          team_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      invoke_sync_league_rosters: { Args: never; Returns: undefined }
+      invoke_sync_nfl_players: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
