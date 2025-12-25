@@ -20,7 +20,7 @@ export type Database = {
           college: string | null
           created_at: string | null
           full_name: string
-          player_id: number
+          player_id: string
           position: string | null
           team: string | null
           updated_at: string | null
@@ -31,7 +31,7 @@ export type Database = {
           college?: string | null
           created_at?: string | null
           full_name: string
-          player_id: number
+          player_id: string
           position?: string | null
           team?: string | null
           updated_at?: string | null
@@ -42,7 +42,7 @@ export type Database = {
           college?: string | null
           created_at?: string | null
           full_name?: string
-          player_id?: number
+          player_id?: string
           position?: string | null
           team?: string | null
           updated_at?: string | null
