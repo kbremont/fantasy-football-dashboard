@@ -17,9 +17,9 @@ interface DestinationDraft {
 
 // Placeholder data - update with actual draft information
 const DESTINATION_DRAFTS: DestinationDraft[] = [
-  { year: 2025, location: 'TBD', winner: 'TBD' },
-  { year: 2024, location: 'TBD', winner: 'TBD' },
-  { year: 2023, location: 'TBD', winner: 'TBD' },
+  { year: 2025, location: 'Playa Del Carmen, MX', winner: 'TBD' },
+  { year: 2024, location: 'Hollywood, FL', winner: 'Baker' },
+  { year: 2023, location: 'Virtual', winner: 'Steffer' },
 ]
 
 // Helper to get draft cover image URL from storage
@@ -215,14 +215,14 @@ export function Home() {
                     <span className="text-muted-foreground text-sm">Seasons</span>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Plane className="w-4 h-4 text-accent" />
+                    <span className="text-foreground font-display text-lg">{DESTINATION_DRAFTS.length - 1}</span>
+                    <span className="text-muted-foreground text-sm">Destinations</span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-accent" />
                     <span className="text-foreground font-display text-lg">6</span>
                     <span className="text-muted-foreground text-sm">Keepers Per Team</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Plane className="w-4 h-4 text-accent" />
-                    <span className="text-foreground font-display text-lg">{DESTINATION_DRAFTS.length}</span>
-                    <span className="text-muted-foreground text-sm">Destinations</span>
                   </div>
                 </div>
               </div>
