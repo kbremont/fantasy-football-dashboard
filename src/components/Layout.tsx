@@ -1,10 +1,11 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { Trophy, Calendar } from 'lucide-react'
+import { Trophy, Calendar, TrendingUp } from 'lucide-react'
 
 const navItems = [
   { path: '/', label: 'Standings', icon: Trophy },
   { path: '/matchups', label: 'Matchups', icon: Calendar },
+  { path: '/power-rankings', label: 'Power Rankings', icon: TrendingUp },
 ]
 
 export function Layout() {
