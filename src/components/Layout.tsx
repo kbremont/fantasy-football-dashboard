@@ -23,10 +23,10 @@ export function Layout() {
               </div>
               <div className="hidden sm:block">
                 <h1 className="font-display text-xl tracking-wide text-foreground">
-                  FANTASY
+                  GREASY GOOBLINS
                 </h1>
                 <p className="text-[10px] text-muted-foreground tracking-[0.3em] -mt-0.5">
-                  DASHBOARD
+                  LEAGUE DASHBOARD
                 </p>
               </div>
             </Link>
@@ -70,7 +70,7 @@ export function Layout() {
       <footer className="border-t border-border/30 mt-auto">
         <div className="container mx-auto px-4 py-6">
           <p className="text-center text-xs text-muted-foreground/60">
-            Fantasy Football Dashboard &middot; Powered by Sleeper API
+            Greasy Gooblins League Dashboard &middot; Powered by Sleeper API
           </p>
         </div>
       </footer>
