@@ -4,6 +4,7 @@ import { Home } from '@/pages/Home'
 import { Standings } from '@/pages/Standings'
 import { Matchups } from '@/pages/Matchups'
 import { PowerRankings } from '@/pages/PowerRankings'
+import { Rivals } from '@/pages/Rivals'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/standings" element={<Standings />} />
           <Route path="/matchups" element={<Matchups />} />
           <Route path="/power-rankings" element={<PowerRankings />} />
+          <Route path="/rivals" element={<Rivals />} />
         </Route>
       </Routes>
     </BrowserRouter>
