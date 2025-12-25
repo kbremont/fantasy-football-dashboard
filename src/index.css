@@ -36,6 +36,18 @@
 
     --radius: 0.625rem;
 
+    /* Chart colors for Recharts */
+    --chart-1: 142 76% 46%;   /* Green (primary) */
+    --chart-2: 38 92% 55%;    /* Gold (accent) */
+    --chart-3: 200 80% 55%;   /* Blue */
+    --chart-4: 280 70% 55%;   /* Purple */
+    --chart-5: 340 75% 55%;   /* Pink */
+    --chart-6: 25 90% 55%;    /* Orange */
+    --chart-7: 180 60% 45%;   /* Teal */
+    --chart-8: 310 60% 50%;   /* Magenta */
+    --chart-9: 60 70% 50%;    /* Yellow */
+    --chart-10: 0 70% 50%;    /* Red */
+
     /* Typography */
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
