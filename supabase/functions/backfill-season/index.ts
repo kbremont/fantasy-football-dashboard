@@ -39,9 +39,12 @@ async function syncMatchupsForWeek(
 ): Promise<number> {
   const matchups = await fetchMatchups(leagueId, week);
 
-  if (matchups.length === 0) return 0;
+  // Filter out entries without matchup_id (bye weeks in playoffs)
+  const activeMatchups = matchups.filter((m: SleeperMatchup) => m.matchup_id !== null);
 
-  const matchupInserts = matchups.map((m: SleeperMatchup) => ({
+  if (activeMatchups.length === 0) return 0;
+
+  const matchupInserts = activeMatchups.map((m: SleeperMatchup) => ({
     season_id: seasonId,
     week,
     matchup_id: m.matchup_id,
@@ -52,7 +55,7 @@ async function syncMatchupsForWeek(
     custom_points: m.custom_points,
   }));
 
-  const rosterInserts = matchups.map((m: SleeperMatchup) => ({
+  const rosterInserts = activeMatchups.map((m: SleeperMatchup) => ({
     season_id: seasonId,
     week,
     roster_id: m.roster_id,
@@ -83,7 +86,7 @@ async function syncMatchupsForWeek(
     throw new Error(`Failed to upsert rosters week ${week}: ${rostersError.message}`);
   }
 
-  return matchups.length;
+  return activeMatchups.length;
 }
 
 /**

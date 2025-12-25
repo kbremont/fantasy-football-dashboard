@@ -37,6 +37,7 @@ interface WeeklyRosterInsert {
 
 /**
  * Transforms Sleeper matchup data into database insert format
+ * Filters out entries without matchup_id (bye weeks in playoffs)
  */
 function transformMatchups(
   matchups: SleeperMatchup[],
@@ -46,7 +47,10 @@ function transformMatchups(
   const matchupInserts: MatchupInsert[] = [];
   const rosterInserts: WeeklyRosterInsert[] = [];
 
-  for (const matchup of matchups) {
+  // Filter out entries without matchup_id (bye weeks in playoffs)
+  const activeMatchups = matchups.filter((m) => m.matchup_id !== null);
+
+  for (const matchup of activeMatchups) {
     // Matchup insert
     matchupInserts.push({
       season_id: seasonId,
