@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Trophy, TrendingUp, TrendingDown, Minus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Season {
@@ -35,7 +35,11 @@ interface StandingRow {
   points_against: number
   streak: number
   streak_type: 'W' | 'L' | null
+  original_rank: number
 }
+
+type SortColumn = 'rank' | 'team_name' | 'wins' | 'losses' | 'points_for' | 'points_against' | 'diff' | 'streak'
+type SortDirection = 'asc' | 'desc'
 
 export function Standings() {
   const [seasons, setSeasons] = useState<Season[]>([])
@@ -43,6 +47,8 @@ export function Standings() {
   const [standings, setStandings] = useState<StandingRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [sortColumn, setSortColumn] = useState<SortColumn>('wins')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
   // Fetch seasons on mount
   useEffect(() => {
@@ -110,6 +116,7 @@ export function Standings() {
             points_against: 0,
             streak: 0,
             streak_type: null,
+            original_rank: 0,
           })
         })
 
@@ -194,11 +201,16 @@ export function Standings() {
           standing.streak_type = lastResult === 'W' ? 'W' : 'L'
         })
 
-        // Sort by wins (desc), then points_for (desc)
-        const sortedStandings = Array.from(standingsMap.values()).sort((a, b) => {
-          if (b.wins !== a.wins) return b.wins - a.wins
-          return b.points_for - a.points_for
-        })
+        // Sort by wins (desc), then points_for (desc) and assign original_rank
+        const sortedStandings = Array.from(standingsMap.values())
+          .sort((a, b) => {
+            if (b.wins !== a.wins) return b.wins - a.wins
+            return b.points_for - a.points_for
+          })
+          .map((standing, index) => ({
+            ...standing,
+            original_rank: index + 1,
+          }))
 
         setStandings(sortedStandings)
       } catch (err) {
@@ -268,6 +280,86 @@ export function Standings() {
   const getPointsDiff = (pf: number, pa: number) => {
     const diff = pf - pa
     return diff
+  }
+
+  // Sort standings based on current sort column and direction
+  const sortedStandings = [...standings].sort((a, b) => {
+    let aValue: number | string
+    let bValue: number | string
+
+    switch (sortColumn) {
+      case 'rank':
+        aValue = a.original_rank
+        bValue = b.original_rank
+        break
+      case 'team_name':
+        aValue = a.team_name.toLowerCase()
+        bValue = b.team_name.toLowerCase()
+        break
+      case 'wins':
+        aValue = a.wins
+        bValue = b.wins
+        break
+      case 'losses':
+        aValue = a.losses
+        bValue = b.losses
+        break
+      case 'points_for':
+        aValue = a.points_for
+        bValue = b.points_for
+        break
+      case 'points_against':
+        aValue = a.points_against
+        bValue = b.points_against
+        break
+      case 'diff':
+        aValue = a.points_for - a.points_against
+        bValue = b.points_for - b.points_against
+        break
+      case 'streak':
+        // Sort by streak value, with winning streaks first
+        aValue = a.streak_type === 'W' ? a.streak : a.streak_type === 'L' ? -a.streak : 0
+        bValue = b.streak_type === 'W' ? b.streak : b.streak_type === 'L' ? -b.streak : 0
+        break
+      default:
+        aValue = a.original_rank
+        bValue = b.original_rank
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue)
+    }
+
+    return sortDirection === 'asc'
+      ? (aValue as number) - (bValue as number)
+      : (bValue as number) - (aValue as number)
+  })
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      // Toggle direction if same column
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Set new column with smart default direction
+      setSortColumn(column)
+      // Lower is better: rank, losses, points_against
+      // Alphabetical: team_name
+      const defaultAsc = ['rank', 'team_name', 'losses', 'points_against'].includes(column)
+      setSortDirection(defaultAsc ? 'asc' : 'desc')
+    }
+  }
+
+  const SortIcon = ({ column }: { column: SortColumn }) => {
+    if (sortColumn !== column) {
+      return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />
+    }
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="w-3 h-3 ml-1 text-primary" />
+    ) : (
+      <ArrowDown className="w-3 h-3 ml-1 text-primary" />
+    )
   }
 
   const selectedSeason = seasons.find((s) => s.id === selectedSeasonId)
@@ -343,32 +435,74 @@ export function Standings() {
             <Table>
               <TableHeader>
                 <TableRow className="border-border/30 hover:bg-transparent">
-                  <TableHead className="w-16 text-center font-display text-xs tracking-wider text-muted-foreground sticky left-0 z-20 bg-card">
-                    RANK
+                  <TableHead
+                    className="w-16 text-center font-display text-xs tracking-wider text-muted-foreground sticky left-0 z-20 bg-card cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('rank')}
+                  >
+                    <span className="inline-flex items-center justify-center">
+                      RANK
+                      <SortIcon column="rank" />
+                    </span>
                   </TableHead>
-                  <TableHead className="font-display text-xs tracking-wider text-muted-foreground sticky left-12 z-10 bg-card shadow-[8px_0_12px_-4px_rgba(0,0,0,0.4)]">
-                    TEAM
+                  <TableHead
+                    className="font-display text-xs tracking-wider text-muted-foreground sticky left-12 z-10 bg-card shadow-[8px_0_12px_-4px_rgba(0,0,0,0.4)] cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('team_name')}
+                  >
+                    <span className="inline-flex items-center">
+                      TEAM
+                      <SortIcon column="team_name" />
+                    </span>
                   </TableHead>
-                  <TableHead className="text-center font-display text-xs tracking-wider text-muted-foreground">
-                    RECORD
+                  <TableHead
+                    className="text-center font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('wins')}
+                  >
+                    <span className="inline-flex items-center justify-center">
+                      RECORD
+                      <SortIcon column="wins" />
+                    </span>
                   </TableHead>
-                  <TableHead className="text-center font-display text-xs tracking-wider text-muted-foreground">
-                    STREAK
+                  <TableHead
+                    className="text-center font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('streak')}
+                  >
+                    <span className="inline-flex items-center justify-center">
+                      STREAK
+                      <SortIcon column="streak" />
+                    </span>
                   </TableHead>
-                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground">
-                    PF
+                  <TableHead
+                    className="text-right font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('points_for')}
+                  >
+                    <span className="inline-flex items-center justify-end w-full">
+                      PF
+                      <SortIcon column="points_for" />
+                    </span>
                   </TableHead>
-                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground">
-                    PA
+                  <TableHead
+                    className="text-right font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('points_against')}
+                  >
+                    <span className="inline-flex items-center justify-end w-full">
+                      PA
+                      <SortIcon column="points_against" />
+                    </span>
                   </TableHead>
-                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground">
-                    DIFF
+                  <TableHead
+                    className="text-right font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleSort('diff')}
+                  >
+                    <span className="inline-flex items-center justify-end w-full">
+                      DIFF
+                      <SortIcon column="diff" />
+                    </span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {standings.map((team, index) => {
-                  const rank = index + 1
+                {sortedStandings.map((team) => {
+                  const rank = team.original_rank
                   const diff = getPointsDiff(team.points_for, team.points_against)
 
                   return (
