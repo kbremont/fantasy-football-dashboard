@@ -6,6 +6,7 @@ import { Matchups } from '@/pages/Matchups'
 import { PowerRankings } from '@/pages/PowerRankings'
 import { Rivals } from '@/pages/Rivals'
 import { LeaguePulse } from '@/pages/LeaguePulse'
+import { DraftGallery } from '@/pages/DraftGallery'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/power-rankings" element={<PowerRankings />} />
           <Route path="/rivals" element={<Rivals />} />
           <Route path="/league-pulse" element={<LeaguePulse />} />
+          <Route path="/draft/:year" element={<DraftGallery />} />
         </Route>
       </Routes>
     </BrowserRouter>

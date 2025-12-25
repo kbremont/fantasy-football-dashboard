@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
-import { Users, MapPin, Crown, Plane, Calendar, Shield } from 'lucide-react'
+import { Users, MapPin, Crown, Plane, Calendar, Shield, Images } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Supabase Storage base URL for draft-media bucket
@@ -13,13 +14,14 @@ interface DestinationDraft {
   year: number
   location: string
   winner: string
+  hasGallery: boolean
 }
 
 // Placeholder data - update with actual draft information
 const DESTINATION_DRAFTS: DestinationDraft[] = [
-  { year: 2025, location: 'Playa Del Carmen, MX', winner: 'TBD' },
-  { year: 2024, location: 'Hollywood, FL', winner: 'Baker' },
-  { year: 2023, location: 'Virtual', winner: 'Steffer' },
+  { year: 2025, location: 'Playa Del Carmen, MX', winner: 'TBD', hasGallery: true },
+  { year: 2024, location: 'Hollywood, FL', winner: 'Baker', hasGallery: false },
+  { year: 2023, location: 'Virtual', winner: 'Steffer', hasGallery: false },
 ]
 
 // Helper to get draft cover image URL from storage
@@ -29,11 +31,12 @@ function DraftCard({ draft, index }: { draft: DestinationDraft; index: number })
   const [imageError, setImageError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
 
-  return (
+  const cardContent = (
     <Card
       className={cn(
         'group border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up',
-        'hover:border-primary/50 hover:bg-card/70 transition-all duration-500',
+        'transition-all duration-500',
+        draft.hasGallery && 'hover:border-primary/50 hover:bg-card/70 cursor-pointer',
         `stagger-${Math.min(index + 3, 10)}`
       )}
     >
@@ -50,6 +53,16 @@ function DraftCard({ draft, index }: { draft: DestinationDraft; index: number })
           </div>
         </div>
 
+        {/* Gallery indicator badge */}
+        {draft.hasGallery && (
+          <div className="absolute top-2 right-2 z-20">
+            <div className="bg-background/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 text-xs font-medium text-foreground/80 group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+              <Images className="w-3.5 h-3.5" />
+              <span>View Gallery</span>
+            </div>
+          </div>
+        )}
+
         {!imageError ? (
           <>
             {/* Loading skeleton */}
@@ -61,7 +74,7 @@ function DraftCard({ draft, index }: { draft: DestinationDraft; index: number })
               alt={`${draft.year} Draft in ${draft.location}`}
               className={cn(
                 'w-full h-full object-cover transition-all duration-700',
-                'group-hover:scale-110',
+                draft.hasGallery && 'group-hover:scale-110',
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
               onLoad={() => setImageLoaded(true)}
@@ -99,6 +112,17 @@ function DraftCard({ draft, index }: { draft: DestinationDraft; index: number })
       </CardContent>
     </Card>
   )
+
+  // Only wrap with Link if gallery exists
+  if (draft.hasGallery) {
+    return (
+      <Link to={`/draft/${draft.year}`} className="block">
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return cardContent
 }
 
 export function Home() {
