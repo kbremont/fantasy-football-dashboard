@@ -109,7 +109,7 @@ export interface SleeperMatchup {
 
 export interface SleeperTransaction {
   transaction_id: string;
-  type: 'trade' | 'free_agent' | 'waiver';
+  type: 'trade' | 'free_agent' | 'waiver' | 'commissioner';
   status: 'complete' | 'failed' | 'pending';
   roster_ids: number[];
   adds: Record<string, number> | null;

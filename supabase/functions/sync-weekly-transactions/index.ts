@@ -21,7 +21,7 @@ interface TransactionInsert {
   transaction_id: string;
   season_id: number;
   week: number;
-  type: 'trade' | 'free_agent' | 'waiver';
+  type: 'trade' | 'free_agent' | 'waiver' | 'commissioner';
   status: 'complete' | 'failed' | 'pending';
   roster_ids: number[];
   adds: Record<string, number> | null;
