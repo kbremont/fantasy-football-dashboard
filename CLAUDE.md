@@ -40,7 +40,7 @@ Fantasy Football Dashboard is a data pipeline and analytics application that syn
 - Primary key: `id` (SERIAL)
 - Includes: season_year, sleeper_league_id, is_current, total_weeks
 - Unique constraints on season_year and sleeper_league_id
-- Note: Sleeper uses Super Bowl year (2024-25 season = "2025")
+- Note: Sleeper uses the season start year (2025-26 season = "2025")
 
 **`matchups`** - Weekly matchup results
 - Primary key: `id` (BIGSERIAL)
@@ -320,7 +320,7 @@ GET https://api.sleeper.app/v1/league/{league_id}/matchups/{week}
 GET https://api.sleeper.app/v1/league/{league_id}/transactions/{week}
 ```
 
-**Note:** Sleeper uses the Super Bowl year for season naming. The 2024-25 NFL season is labeled "2025" in Sleeper.
+**Note:** Sleeper uses the season start year for naming. The 2025-26 NFL season (starting Sep 2025) is labeled "2025" in Sleeper.
 
 ## Row Level Security (RLS)
 

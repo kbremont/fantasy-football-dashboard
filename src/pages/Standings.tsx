@@ -289,7 +289,7 @@ export function Standings() {
             <SelectContent>
               {seasons.map((season) => (
                 <SelectItem key={season.id} value={season.id.toString()}>
-                  {season.season_year - 1}-{season.season_year.toString().slice(-2)} Season
+                  {season.season_year}-{(season.season_year + 1).toString().slice(-2)} Season
                   {season.is_current && ' (Current)'}
                 </SelectItem>
               ))}
@@ -326,7 +326,7 @@ export function Standings() {
             <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
               <Trophy className="w-5 h-5 text-primary" />
               {selectedSeason
-                ? `${selectedSeason.season_year - 1}-${selectedSeason.season_year.toString().slice(-2)} STANDINGS`
+                ? `${selectedSeason.season_year}-${(selectedSeason.season_year + 1).toString().slice(-2)} STANDINGS`
                 : 'SEASON STANDINGS'}
             </CardTitle>
           </CardHeader>
