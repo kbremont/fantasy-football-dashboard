@@ -1,32 +1,18 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import type { Database } from '../../../src/types/database.ts';
-import type {
-  SleeperRoster,
-  SleeperUser,
-  RosterInsert
-} from './types.ts';
+import { createServiceClient } from '../_shared/supabase-client.ts';
 import {
-  SLEEPER_ROSTERS_URL,
-  SLEEPER_USERS_URL,
-  REQUEST_TIMEOUT_MS
-} from './config.ts';
+  fetchRosters,
+  fetchUsers,
+  type SleeperRoster,
+  type SleeperUser,
+} from '../_shared/sleeper-api.ts';
+import { getCurrentLeagueId } from '../_shared/season-utils.ts';
 
-/**
- * Fetches data from a URL with timeout protection
- */
-async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-    return response;
-  } catch (error) {
-    clearTimeout(timeout);
-    throw error;
-  }
+// Roster ready for database insert
+interface RosterInsert {
+  roster_id: number;
+  owner_id: string;
+  team_name: string | null;
 }
 
 /**
@@ -56,42 +42,23 @@ Deno.serve(async (_req: Request) => {
 
   try {
     // 1. Initialize Supabase client with service role
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createServiceClient();
 
-    const supabase = createClient<Database>(
-      supabaseUrl,
-      supabaseServiceKey,
-      {
-        auth: { persistSession: false }
-      }
-    );
+    // 2. Get the current league ID from the seasons table
+    console.log('Getting current league ID from seasons table...');
+    const leagueId = await getCurrentLeagueId(supabase);
+    console.log(`Using league ID: ${leagueId}`);
 
-    // 2. Fetch rosters and users from Sleeper API in parallel
+    // 3. Fetch rosters and users from Sleeper API in parallel
     console.log('Fetching league rosters and users from Sleeper API...');
-    const [rostersResponse, usersResponse] = await Promise.all([
-      fetchWithTimeout(SLEEPER_ROSTERS_URL, REQUEST_TIMEOUT_MS),
-      fetchWithTimeout(SLEEPER_USERS_URL, REQUEST_TIMEOUT_MS),
+    const [rosters, users] = await Promise.all([
+      fetchRosters(leagueId),
+      fetchUsers(leagueId),
     ]);
-
-    if (!rostersResponse.ok) {
-      throw new Error(
-        `Sleeper rosters API error: ${rostersResponse.status} ${rostersResponse.statusText}`
-      );
-    }
-
-    if (!usersResponse.ok) {
-      throw new Error(
-        `Sleeper users API error: ${usersResponse.status} ${usersResponse.statusText}`
-      );
-    }
-
-    const rosters: SleeperRoster[] = await rostersResponse.json();
-    const users: SleeperUser[] = await usersResponse.json();
 
     console.log(`Fetched ${rosters.length} rosters and ${users.length} users`);
 
-    // 3. Merge roster and user data
+    // 4. Merge roster and user data
     const rosterInserts = mergeRosterData(rosters, users);
 
     if (rosterInserts.length === 0) {
@@ -108,7 +75,7 @@ Deno.serve(async (_req: Request) => {
       );
     }
 
-    // 4. Upsert to Supabase
+    // 5. Upsert to Supabase
     console.log(`Upserting ${rosterInserts.length} rosters...`);
 
     const { error } = await supabase
@@ -122,10 +89,11 @@ Deno.serve(async (_req: Request) => {
       throw new Error(`Database upsert failed: ${error.message}`);
     }
 
-    // 5. Return response
+    // 6. Return response
     const duration = Date.now() - startTime;
     const response = {
       success: true,
+      leagueId,
       rostersProcessed: rosterInserts.length,
       durationMs: duration,
       timestamp: new Date().toISOString(),
