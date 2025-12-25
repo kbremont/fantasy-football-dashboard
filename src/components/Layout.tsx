@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { Home, Trophy, Calendar, TrendingUp, Swords } from 'lucide-react'
+import { Home, Trophy, Calendar, TrendingUp, Swords, Activity } from 'lucide-react'
 
 const navItems = [
   { path: '/', label: 'Home', icon: Home },
@@ -8,6 +8,7 @@ const navItems = [
   { path: '/matchups', label: 'Matchups', icon: Calendar },
   { path: '/power-rankings', label: 'Power Rankings', icon: TrendingUp },
   { path: '/rivals', label: 'Rivals', icon: Swords },
+  { path: '/league-pulse', label: 'League Pulse', icon: Activity },
 ]
 
 export function Layout() {
