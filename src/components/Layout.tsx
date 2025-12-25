@@ -6,9 +6,9 @@ const navItems = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/standings', label: 'Standings', icon: Trophy },
   { path: '/matchups', label: 'Matchups', icon: Calendar },
-  { path: '/power-rankings', label: 'Power Rankings', icon: TrendingUp },
-  { path: '/rivals', label: 'Rivals', icon: Swords },
   { path: '/league-pulse', label: 'League Pulse', icon: Activity },
+  { path: '/rivals', label: 'Rivals', icon: Swords },
+  { path: '/power-rankings', label: 'Power Rankings', icon: TrendingUp },
 ]
 
 export function Layout() {
