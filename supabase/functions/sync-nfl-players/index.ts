@@ -43,7 +43,9 @@ function transformPlayers(playersObj: SleeperPlayersResponse): NFLPlayerInsert[]
   return Object.entries(playersObj)
     .map(([_, player]) => player)
     .filter((player): player is SleeperPlayer & { full_name: string } => {
-      return player.full_name !== null;
+      return player.full_name !== null &&
+             player.full_name !== undefined &&
+             player.full_name.trim() !== '';
     })
     .map((player) => ({
       player_id: player.player_id,
