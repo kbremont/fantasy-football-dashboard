@@ -29,8 +29,9 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.function_name }}" ]; then
             echo "functions=[\"${{ inputs.function_name }}\"]" >> $GITHUB_OUTPUT
           else
+            # Exclude directories starting with _ (like _shared) as they are not deployable functions
             CHANGED=$(git diff --name-only HEAD~1 HEAD -- supabase/functions/ | \
-              grep -oP 'supabase/functions/\K[^/]+' | sort -u | jq -R -s -c 'split("\n") | map(select(. != ""))')
+              grep -oP 'supabase/functions/\K[^/]+' | grep -v '^_' | sort -u | jq -R -s -c 'split("\n") | map(select(. != ""))')
             echo "functions=$CHANGED" >> $GITHUB_OUTPUT
           fi
 
