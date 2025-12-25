@@ -132,11 +132,6 @@ export function DraftGallery() {
   const [heroLoaded, setHeroLoaded] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
-  // Scroll to top on mount and year change
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [yearNum])
-
   useEffect(() => {
     async function fetchMedia() {
       setLoading(true)
