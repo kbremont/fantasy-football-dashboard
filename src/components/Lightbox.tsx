@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef, useState } from 'react'
-import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type MediaItem } from '@/lib/storage'
 
@@ -126,6 +126,27 @@ export function Lightbox({ media, selectedIndex, onClose, onNavigate }: Lightbox
     }
   }
 
+  // Download current media
+  const downloadMedia = async () => {
+    if (!currentItem) return
+
+    try {
+      const response = await fetch(currentItem.url)
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = currentItem.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      console.error('Download failed:', error)
+    }
+  }
+
   // Handle click outside
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === containerRef.current) {
@@ -158,6 +179,22 @@ export function Lightbox({ media, selectedIndex, onClose, onNavigate }: Lightbox
         className="absolute inset-0 flex items-center justify-center p-4 pb-28"
         onClick={handleBackdropClick}
       >
+        {/* Download button */}
+        <button
+          onClick={downloadMedia}
+          className={cn(
+            'absolute top-4 right-20 z-20',
+            'w-12 h-12 rounded-full',
+            'bg-white/10 backdrop-blur-md border border-white/10',
+            'flex items-center justify-center',
+            'text-white/70 hover:text-white hover:bg-white/20',
+            'transition-all duration-300',
+            showControls ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          <Download className="w-5 h-5" />
+        </button>
+
         {/* Close button */}
         <button
           onClick={onClose}
