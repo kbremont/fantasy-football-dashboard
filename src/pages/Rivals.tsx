@@ -436,7 +436,108 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
         </div>
 
         <CardContent className="p-0">
-          <div className="grid grid-cols-[1fr_auto_1fr] min-h-[280px]">
+          {/* Mobile Layout - Stacked */}
+          <div className="md:hidden">
+            {/* Team A */}
+            <div
+              className={cn(
+                'relative p-6 flex flex-col items-center justify-center transition-all duration-500',
+                'bg-gradient-to-b from-primary/15 via-primary/5 to-transparent',
+                dominantTeam === 'teamA' && 'from-primary/25 via-primary/10'
+              )}
+            >
+              {dominantTeam === 'teamA' && (
+                <div className="absolute top-3 left-3 animate-pulse">
+                  <Crown className="w-5 h-5 text-primary" />
+                </div>
+              )}
+              <div className="text-center space-y-2">
+                <p className="text-xs font-medium text-primary/70 uppercase tracking-widest">
+                  {seasonLabel} RECORD
+                </p>
+                <h2 className="text-lg font-display tracking-wide text-foreground truncate max-w-[180px]">
+                  {teamAName}
+                </h2>
+                <p
+                  className={cn(
+                    'text-5xl font-display tabular-nums transition-all',
+                    dominantTeam === 'teamA' ? 'text-primary glow-primary-text' : 'text-foreground'
+                  )}
+                >
+                  {teamAWins}
+                </p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  {teamAWins === 1 ? 'WIN' : 'WINS'}
+                </p>
+              </div>
+            </div>
+
+            {/* Center VS Badge - Mobile */}
+            <div className="relative flex items-center justify-center py-4 border-y border-border/20">
+              {/* Horizontal gradient line */}
+              <div className="absolute left-0 right-0 h-px bg-gradient-to-r from-primary via-white/50 to-accent" />
+
+              <div className="flex items-center gap-4">
+                {/* VS Badge */}
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-full bg-background border-2 border-border/50 flex items-center justify-center shadow-xl">
+                    <Swords className="w-5 h-5 text-foreground" />
+                  </div>
+                </div>
+
+                {/* Ties and games info */}
+                <div className="flex items-center gap-3">
+                  {ties > 0 && (
+                    <div className="px-2 py-0.5 rounded-full bg-secondary/50 border border-border/30">
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {ties} {ties === 1 ? 'TIE' : 'TIES'}
+                      </p>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground/60">
+                    {totalGames} {totalGames === 1 ? 'game' : 'games'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Team B */}
+            <div
+              className={cn(
+                'relative p-6 flex flex-col items-center justify-center transition-all duration-500',
+                'bg-gradient-to-t from-accent/15 via-accent/5 to-transparent',
+                dominantTeam === 'teamB' && 'from-accent/25 via-accent/10'
+              )}
+            >
+              {dominantTeam === 'teamB' && (
+                <div className="absolute top-3 right-3 animate-pulse">
+                  <Crown className="w-5 h-5 text-accent" />
+                </div>
+              )}
+              <div className="text-center space-y-2">
+                <p className="text-xs font-medium text-accent/70 uppercase tracking-widest">
+                  {seasonLabel} RECORD
+                </p>
+                <h2 className="text-lg font-display tracking-wide text-foreground truncate max-w-[180px]">
+                  {teamBName}
+                </h2>
+                <p
+                  className={cn(
+                    'text-5xl font-display tabular-nums transition-all',
+                    dominantTeam === 'teamB' ? 'text-accent glow-gold-text' : 'text-foreground'
+                  )}
+                >
+                  {teamBWins}
+                </p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  {teamBWins === 1 ? 'WIN' : 'WINS'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout - Side by Side */}
+          <div className="hidden md:grid grid-cols-[1fr_auto_1fr] min-h-[280px]">
             {/* Team A Side */}
             <div
               className={cn(
