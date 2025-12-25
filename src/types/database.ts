@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      matchups: {
+        Row: {
+          created_at: string | null
+          custom_points: number | null
+          id: number
+          matchup_id: number
+          players: string[]
+          points: number | null
+          roster_id: number
+          season_id: number
+          starters: string[]
+          updated_at: string | null
+          week: number
+        }
+        Insert: {
+          created_at?: string | null
+          custom_points?: number | null
+          id?: number
+          matchup_id: number
+          players: string[]
+          points?: number | null
+          roster_id: number
+          season_id: number
+          starters: string[]
+          updated_at?: string | null
+          week: number
+        }
+        Update: {
+          created_at?: string | null
+          custom_points?: number | null
+          id?: number
+          matchup_id?: number
+          players?: string[]
+          points?: number | null
+          roster_id?: number
+          season_id?: number
+          starters?: string[]
+          updated_at?: string | null
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matchups_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfl_players: {
         Row: {
           age: number | null
@@ -74,6 +124,133 @@ export type Database = {
         }
         Relationships: []
       }
+      seasons: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_current: boolean | null
+          season_year: number
+          sleeper_league_id: string
+          total_weeks: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_current?: boolean | null
+          season_year: number
+          sleeper_league_id: string
+          total_weeks?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_current?: boolean | null
+          season_year?: number
+          sleeper_league_id?: string
+          total_weeks?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          adds: Json | null
+          created_at: string | null
+          created_at_sleeper: number | null
+          creator_id: string | null
+          draft_picks: Json | null
+          drops: Json | null
+          id: number
+          roster_ids: number[] | null
+          season_id: number
+          settings: Json | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          transaction_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          waiver_budget: Json | null
+          week: number
+        }
+        Insert: {
+          adds?: Json | null
+          created_at?: string | null
+          created_at_sleeper?: number | null
+          creator_id?: string | null
+          draft_picks?: Json | null
+          drops?: Json | null
+          id?: number
+          roster_ids?: number[] | null
+          season_id: number
+          settings?: Json | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          transaction_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          waiver_budget?: Json | null
+          week: number
+        }
+        Update: {
+          adds?: Json | null
+          created_at?: string | null
+          created_at_sleeper?: number | null
+          creator_id?: string | null
+          draft_picks?: Json | null
+          drops?: Json | null
+          id?: number
+          roster_ids?: number[] | null
+          season_id?: number
+          settings?: Json | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          transaction_id?: string
+          type?: Database["public"]["Enums"]["transaction_type"]
+          waiver_budget?: Json | null
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_rosters: {
+        Row: {
+          created_at: string | null
+          id: number
+          player_ids: string[]
+          roster_id: number
+          season_id: number
+          week: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          player_ids: string[]
+          roster_id: number
+          season_id: number
+          week: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          player_ids?: string[]
+          roster_id?: number
+          season_id?: number
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_rosters_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -81,11 +258,14 @@ export type Database = {
     Functions: {
       invoke_sync_league_rosters: { Args: never; Returns: undefined }
       invoke_sync_nfl_players: { Args: never; Returns: undefined }
+      invoke_sync_weekly_matchups: { Args: never; Returns: undefined }
+      invoke_sync_weekly_transactions: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      transaction_status: "complete" | "failed" | "pending"
+      transaction_type: "trade" | "free_agent" | "waiver" | "commissioner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -212,6 +392,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      transaction_status: ["complete", "failed", "pending"],
+      transaction_type: ["trade", "free_agent", "waiver", "commissioner"],
+    },
   },
 } as const
