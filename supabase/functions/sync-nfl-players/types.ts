@@ -1,6 +1,6 @@
 // Sleeper API player object structure
 export interface SleeperPlayer {
-  player_id: number;
+  player_id: string;
   full_name: string | null;
   position: string | null;
   team: string | null;
@@ -17,7 +17,7 @@ export type SleeperPlayersResponse = {
 
 // Player ready for database insert
 export interface NFLPlayerInsert {
-  player_id: number;
+  player_id: string;
   full_name: string;
   position: string | null;
   team: string | null;
