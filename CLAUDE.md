@@ -199,6 +199,16 @@ The publishable key (not anon key) is used for client-side access. Get it from S
 - **Colors**: Primary green (wins), Destructive red (losses), Gold accent
 - **Effects**: Gradient backgrounds, glow effects, fade-up animations
 
+### UI Development
+
+**Important**: When making UI changes (new pages, components, or significant visual updates), use the `/frontend-design` skill. This ensures high design quality and consistency with the existing sports-editorial theme.
+
+Use `/frontend-design` for:
+- Creating new pages or dashboards
+- Building new UI components
+- Making significant visual changes to existing components
+- Adding new chart visualizations
+
 ## Edge Functions Architecture
 
 All edge functions follow a similar pattern:
