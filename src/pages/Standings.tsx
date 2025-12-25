@@ -219,6 +219,14 @@ export function Standings() {
     return ''
   }
 
+  // Solid opaque backgrounds for sticky cells - prevents content bleeding through
+  const getStickyCellBg = (rank: number) => {
+    if (rank === 1) return 'bg-[hsl(45_30%_12%)]' // Solid gold-tinted dark
+    if (rank === 2) return 'bg-[hsl(215_15%_14%)]' // Solid silver-tinted dark
+    if (rank === 3) return 'bg-[hsl(25_25%_12%)]' // Solid bronze-tinted dark
+    return 'bg-card'
+  }
+
   const getRankBadge = (rank: number) => {
     const baseClasses = 'w-8 h-8 rounded-full flex items-center justify-center font-display text-lg font-bold'
 
@@ -321,7 +329,7 @@ export function Standings() {
 
       {/* Standings Table */}
       {!loading && !error && standings.length > 0 && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up stagger-1">
+        <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-1">
           <CardHeader className="border-b border-border/30 bg-secondary/30">
             <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
               <Trophy className="w-5 h-5 text-primary" />
@@ -331,28 +339,29 @@ export function Standings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border/30 hover:bg-transparent">
-                  <TableHead className="w-16 text-center font-display text-xs tracking-wider text-muted-foreground">
+                  <TableHead className="w-16 text-center font-display text-xs tracking-wider text-muted-foreground sticky left-0 z-20 bg-card">
                     RANK
                   </TableHead>
-                  <TableHead className="font-display text-xs tracking-wider text-muted-foreground">
+                  <TableHead className="font-display text-xs tracking-wider text-muted-foreground sticky left-12 z-10 bg-card shadow-[8px_0_12px_-4px_rgba(0,0,0,0.4)]">
                     TEAM
                   </TableHead>
                   <TableHead className="text-center font-display text-xs tracking-wider text-muted-foreground">
                     RECORD
                   </TableHead>
-                  <TableHead className="text-center font-display text-xs tracking-wider text-muted-foreground hidden sm:table-cell">
+                  <TableHead className="text-center font-display text-xs tracking-wider text-muted-foreground">
                     STREAK
                   </TableHead>
                   <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground">
                     PF
                   </TableHead>
-                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground hidden md:table-cell">
+                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground">
                     PA
                   </TableHead>
-                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground hidden lg:table-cell">
+                  <TableHead className="text-right font-display text-xs tracking-wider text-muted-foreground">
                     DIFF
                   </TableHead>
                 </TableRow>
@@ -371,10 +380,10 @@ export function Standings() {
                         `stagger-${Math.min(rank, 10)}`
                       )}
                     >
-                      <TableCell className="text-center py-4">
+                      <TableCell className={cn("text-center py-4 sticky left-0 z-20", getStickyCellBg(rank))}>
                         {getRankBadge(rank)}
                       </TableCell>
-                      <TableCell className="py-4">
+                      <TableCell className={cn("py-4 sticky left-12 z-10 shadow-[8px_0_12px_-4px_rgba(0,0,0,0.4)]", getStickyCellBg(rank))}>
                         <span className={cn(
                           'font-semibold text-base',
                           rank <= 3 && 'text-foreground'
@@ -401,7 +410,7 @@ export function Standings() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-center py-4 hidden sm:table-cell">
+                      <TableCell className="text-center py-4">
                         {team.streak_type ? (
                           <div className={cn(
                             'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm font-medium',
@@ -425,10 +434,10 @@ export function Standings() {
                       <TableCell className="text-right py-4 tabular-nums font-medium">
                         {formatPoints(team.points_for)}
                       </TableCell>
-                      <TableCell className="text-right py-4 tabular-nums text-muted-foreground hidden md:table-cell">
+                      <TableCell className="text-right py-4 tabular-nums text-muted-foreground">
                         {formatPoints(team.points_against)}
                       </TableCell>
-                      <TableCell className="text-right py-4 hidden lg:table-cell">
+                      <TableCell className="text-right py-4">
                         <span className={cn(
                           'tabular-nums font-medium',
                           diff > 0 && 'text-primary',
@@ -444,6 +453,7 @@ export function Standings() {
                 })}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       )}

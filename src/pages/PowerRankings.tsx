@@ -231,6 +231,14 @@ export function PowerRankings() {
     return ''
   }
 
+  // Solid opaque backgrounds for sticky cells - prevents content bleeding through
+  const getStickyCellBg = (rank: number) => {
+    if (rank === 1) return 'bg-[hsl(45_30%_12%)]' // Solid gold-tinted dark
+    if (rank === 2) return 'bg-[hsl(215_15%_14%)]' // Solid silver-tinted dark
+    if (rank === 3) return 'bg-[hsl(25_25%_12%)]' // Solid bronze-tinted dark
+    return 'bg-card'
+  }
+
   const getRankBadge = (rank: number) => {
     const baseClasses =
       'w-10 h-10 rounded-lg flex items-center justify-center font-display text-xl font-bold'
@@ -454,7 +462,7 @@ export function PowerRankings() {
           )}
 
           {/* Power Rankings Table */}
-          <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up stagger-3">
+          <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-3">
             <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
                 <TrendingUp className="w-5 h-5 text-primary" />
@@ -469,7 +477,7 @@ export function PowerRankings() {
                   <TableHeader>
                     <TableRow className="border-border/30 hover:bg-transparent">
                       <TableHead
-                        className="w-16 text-center font-display text-xs tracking-wider text-muted-foreground sticky left-0 bg-card/95 backdrop-blur cursor-pointer hover:text-foreground transition-colors"
+                        className="w-16 text-center font-display text-xs tracking-wider text-muted-foreground sticky left-0 z-20 bg-card cursor-pointer hover:text-foreground transition-colors"
                         onClick={() => handleSort('power_rank')}
                       >
                         <span className="inline-flex items-center justify-center">
@@ -478,7 +486,7 @@ export function PowerRankings() {
                         </span>
                       </TableHead>
                       <TableHead
-                        className="font-display text-xs tracking-wider text-muted-foreground min-w-[140px] cursor-pointer hover:text-foreground transition-colors"
+                        className="font-display text-xs tracking-wider text-muted-foreground min-w-[140px] cursor-pointer hover:text-foreground transition-colors sticky left-14 z-10 bg-card shadow-[8px_0_12px_-4px_rgba(0,0,0,0.4)]"
                         onClick={() => handleSort('team_name')}
                       >
                         <span className="inline-flex items-center">
@@ -496,7 +504,7 @@ export function PowerRankings() {
                         </span>
                       </TableHead>
                       <TableHead
-                        className="text-center font-display text-xs tracking-wider text-muted-foreground hidden sm:table-cell cursor-pointer hover:text-foreground transition-colors"
+                        className="text-center font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                         onClick={() => handleSort('expected_wins')}
                       >
                         <span className="inline-flex items-center justify-center">
@@ -514,7 +522,7 @@ export function PowerRankings() {
                         </span>
                       </TableHead>
                       <TableHead
-                        className="text-center font-display text-xs tracking-wider text-muted-foreground hidden md:table-cell cursor-pointer hover:text-foreground transition-colors"
+                        className="text-center font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                         onClick={() => handleSort('should_be_wins')}
                       >
                         <span className="inline-flex items-center justify-center">
@@ -523,7 +531,7 @@ export function PowerRankings() {
                         </span>
                       </TableHead>
                       <TableHead
-                        className="text-center font-display text-xs tracking-wider text-muted-foreground hidden lg:table-cell cursor-pointer hover:text-foreground transition-colors"
+                        className="text-center font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                         onClick={() => handleSort('consistency_score')}
                       >
                         <span className="inline-flex items-center justify-center">
@@ -532,7 +540,7 @@ export function PowerRankings() {
                         </span>
                       </TableHead>
                       <TableHead
-                        className="text-center font-display text-xs tracking-wider text-muted-foreground hidden lg:table-cell cursor-pointer hover:text-foreground transition-colors"
+                        className="text-center font-display text-xs tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                         onClick={() => handleSort('strength_of_schedule')}
                       >
                         <span className="inline-flex items-center justify-center">
@@ -560,10 +568,10 @@ export function PowerRankings() {
                           getRankStyle(team.power_rank)
                         )}
                       >
-                        <TableCell className="text-center py-4 sticky left-0 bg-inherit">
+                        <TableCell className={cn("text-center py-4 sticky left-0 z-20", getStickyCellBg(team.power_rank))}>
                           {getRankBadge(team.power_rank)}
                         </TableCell>
-                        <TableCell className="py-4">
+                        <TableCell className={cn("py-4 sticky left-14 z-10 shadow-[8px_0_12px_-4px_rgba(0,0,0,0.4)]", getStickyCellBg(team.power_rank))}>
                           <div className="space-y-0.5">
                             <span className={cn(
                               'font-semibold text-base block',
@@ -595,7 +603,7 @@ export function PowerRankings() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center py-4 hidden sm:table-cell">
+                        <TableCell className="text-center py-4">
                           <span className="tabular-nums text-muted-foreground">
                             {team.expected_wins.toFixed(1)}
                           </span>
@@ -617,19 +625,19 @@ export function PowerRankings() {
                             {formatLuck(team.luck_index)}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center py-4 hidden md:table-cell">
+                        <TableCell className="text-center py-4">
                           <span className="tabular-nums">
                             <span className="text-primary">{team.should_be_wins}</span>
                             <span className="text-muted-foreground">-</span>
                             <span className="text-destructive">{team.should_be_losses}</span>
                           </span>
                         </TableCell>
-                        <TableCell className="text-center py-4 hidden lg:table-cell">
+                        <TableCell className="text-center py-4">
                           <span className="tabular-nums text-muted-foreground">
                             {team.consistency_score.toFixed(1)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center py-4 hidden lg:table-cell">
+                        <TableCell className="text-center py-4">
                           <span className="tabular-nums text-muted-foreground">
                             {team.strength_of_schedule.toFixed(1)}
                           </span>
