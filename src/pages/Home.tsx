@@ -203,7 +203,7 @@ export function Home() {
                     As a keeper league, each team retains 6 players at the end of every season—building
                     dynasties, making tough decisions, and adding real stakes to every trade and pickup.
                     And every year, we gather in a new destination for our live draft, transforming
-                    draft day into an unforgettable weekend of camaraderie and strategy debates.
+                    draft day into an unforgettable weekend of camaraderie.
                   </p>
                 </div>
 
