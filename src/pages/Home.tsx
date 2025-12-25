@@ -195,7 +195,7 @@ export function Home() {
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
                     The Greasy Gooblins isn't just a fantasy football league—it's a brotherhood
-                    forged through trash talk, clutch victories, and devastating defeats.
+                    forged through trash talk, clutch victories, devastating defeats, and vicious grape.
                     Founded in 2023, our keeper league brings friends together from across the country
                     for an annual tradition unlike any other.
                   </p>
