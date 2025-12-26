@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase, authReady } from '@/lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -50,6 +50,7 @@ export function Matchups() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [gameOfTheWeek, setGameOfTheWeek] = useState<GameOfTheWeek | null>(null)
+  const weekRefs = useRef<Map<number, HTMLButtonElement>>(new Map())
 
   // Fetch seasons on mount
   useEffect(() => {
@@ -203,6 +204,18 @@ export function Matchups() {
     fetchMatchups()
   }, [selectedSeasonId, selectedWeek, seasons])
 
+  // Scroll to selected week when it changes
+  useEffect(() => {
+    const selectedButton = weekRefs.current.get(selectedWeek)
+    if (selectedButton) {
+      selectedButton.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      })
+    }
+  }, [selectedWeek, maxWeek])
+
   const formatPoints = (points: number) => {
     return points.toLocaleString('en-US', {
       minimumFractionDigits: 2,
@@ -266,11 +279,14 @@ export function Matchups() {
               </Button>
 
               {/* Week Pills */}
-              <div className="flex-1 overflow-x-auto scrollbar-hide">
+              <div className="flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain scrollbar-hide">
                 <div className="flex gap-2 justify-start md:justify-center min-w-max px-2">
                   {weeks.map((week) => (
                     <button
                       key={week}
+                      ref={(el) => {
+                        if (el) weekRefs.current.set(week, el)
+                      }}
                       onClick={() => setSelectedWeek(week)}
                       className={cn(
                         'relative px-4 py-2 rounded-lg font-display text-sm tracking-wide transition-all duration-200',
