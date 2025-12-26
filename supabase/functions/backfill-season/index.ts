@@ -26,6 +26,16 @@ interface WeekResult {
   week: number;
   matchups: number;
   transactions: number;
+  player_points: number;
+}
+
+interface PlayerWeeklyPointsInsert {
+  player_id: string;
+  season_id: number;
+  week: number;
+  roster_id: number;
+  points: number | null;
+  is_starter: boolean;
 }
 
 /**
@@ -36,13 +46,13 @@ async function syncMatchupsForWeek(
   seasonId: number,
   leagueId: string,
   week: number
-): Promise<number> {
+): Promise<{ matchupsCount: number; playerPointsCount: number }> {
   const matchups = await fetchMatchups(leagueId, week);
 
   // Filter out entries without matchup_id (bye weeks in playoffs)
   const activeMatchups = matchups.filter((m: SleeperMatchup) => m.matchup_id !== null);
 
-  if (activeMatchups.length === 0) return 0;
+  if (activeMatchups.length === 0) return { matchupsCount: 0, playerPointsCount: 0 };
 
   const matchupInserts = activeMatchups.map((m: SleeperMatchup) => ({
     season_id: seasonId,
@@ -62,6 +72,24 @@ async function syncMatchupsForWeek(
     roster_id: m.roster_id,
     player_ids: m.players || [],
   }));
+
+  // Extract player weekly points from all matchups
+  const playerPointsInserts: PlayerWeeklyPointsInsert[] = [];
+  for (const m of activeMatchups) {
+    if (m.players_points) {
+      const starters = m.starters || [];
+      for (const [playerId, points] of Object.entries(m.players_points)) {
+        playerPointsInserts.push({
+          player_id: playerId,
+          season_id: seasonId,
+          week,
+          roster_id: m.roster_id,
+          points: points,
+          is_starter: starters.includes(playerId),
+        });
+      }
+    }
+  }
 
   // Upsert matchups
   const { error: matchupsError } = await supabase
@@ -87,7 +115,21 @@ async function syncMatchupsForWeek(
     throw new Error(`Failed to upsert rosters week ${week}: ${rostersError.message}`);
   }
 
-  return activeMatchups.length;
+  // Upsert player weekly points
+  if (playerPointsInserts.length > 0) {
+    const { error: playerPointsError } = await supabase
+      .from('player_weekly_points')
+      .upsert(playerPointsInserts, {
+        onConflict: 'player_id,season_id,week,roster_id',
+        ignoreDuplicates: false,
+      });
+
+    if (playerPointsError) {
+      throw new Error(`Failed to upsert player weekly points week ${week}: ${playerPointsError.message}`);
+    }
+  }
+
+  return { matchupsCount: activeMatchups.length, playerPointsCount: playerPointsInserts.length };
 }
 
 /**
@@ -147,7 +189,7 @@ async function backfillSeason(
   for (let week = startWeek; week <= endWeek; week++) {
     console.log(`Backfilling week ${week} of season ${season.season_year}...`);
 
-    const matchupsCount = await syncMatchupsForWeek(
+    const { matchupsCount, playerPointsCount } = await syncMatchupsForWeek(
       supabase,
       season.id,
       season.sleeper_league_id,
@@ -165,6 +207,7 @@ async function backfillSeason(
       week,
       matchups: matchupsCount,
       transactions: transactionsCount,
+      player_points: playerPointsCount,
     });
 
     // Delay between weeks to avoid rate limiting

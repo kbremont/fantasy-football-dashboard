@@ -36,6 +36,15 @@ interface WeeklyRosterInsert {
   player_ids: string[];
 }
 
+interface PlayerWeeklyPointsInsert {
+  player_id: string;
+  season_id: number;
+  week: number;
+  roster_id: number;
+  points: number | null;
+  is_starter: boolean;
+}
+
 /**
  * Transforms Sleeper matchup data into database insert format
  * Filters out entries without matchup_id (bye weeks in playoffs)
@@ -44,9 +53,10 @@ function transformMatchups(
   matchups: SleeperMatchup[],
   seasonId: number,
   week: number
-): { matchupInserts: MatchupInsert[]; rosterInserts: WeeklyRosterInsert[] } {
+): { matchupInserts: MatchupInsert[]; rosterInserts: WeeklyRosterInsert[]; playerPointsInserts: PlayerWeeklyPointsInsert[] } {
   const matchupInserts: MatchupInsert[] = [];
   const rosterInserts: WeeklyRosterInsert[] = [];
+  const playerPointsInserts: PlayerWeeklyPointsInsert[] = [];
 
   // Filter out entries without matchup_id (bye weeks in playoffs)
   const activeMatchups = matchups.filter((m) => m.matchup_id !== null);
@@ -72,9 +82,24 @@ function transformMatchups(
       roster_id: matchup.roster_id,
       player_ids: matchup.players || [],
     });
+
+    // Extract player weekly points from players_points JSONB
+    if (matchup.players_points) {
+      const starters = matchup.starters || [];
+      for (const [playerId, points] of Object.entries(matchup.players_points)) {
+        playerPointsInserts.push({
+          player_id: playerId,
+          season_id: seasonId,
+          week,
+          roster_id: matchup.roster_id,
+          points: points,
+          is_starter: starters.includes(playerId),
+        });
+      }
+    }
   }
 
-  return { matchupInserts, rosterInserts };
+  return { matchupInserts, rosterInserts, playerPointsInserts };
 }
 
 /**
@@ -84,7 +109,7 @@ async function syncWeek(
   supabase: ReturnType<typeof createServiceClient>,
   season: Season,
   week: number
-): Promise<{ matchupsCount: number; rostersCount: number }> {
+): Promise<{ matchupsCount: number; rostersCount: number; playerPointsCount: number }> {
   console.log(`Syncing week ${week} for season ${season.season_year}...`);
 
   // Fetch matchups from Sleeper
@@ -92,11 +117,11 @@ async function syncWeek(
 
   if (matchups.length === 0) {
     console.log(`No matchups found for week ${week}`);
-    return { matchupsCount: 0, rostersCount: 0 };
+    return { matchupsCount: 0, rostersCount: 0, playerPointsCount: 0 };
   }
 
   // Transform data
-  const { matchupInserts, rosterInserts } = transformMatchups(
+  const { matchupInserts, rosterInserts, playerPointsInserts } = transformMatchups(
     matchups,
     season.id,
     week
@@ -126,9 +151,24 @@ async function syncWeek(
     throw new Error(`Failed to upsert weekly rosters: ${rostersError.message}`);
   }
 
+  // Upsert player weekly points
+  if (playerPointsInserts.length > 0) {
+    const { error: playerPointsError } = await supabase
+      .from('player_weekly_points')
+      .upsert(playerPointsInserts, {
+        onConflict: 'player_id,season_id,week,roster_id',
+        ignoreDuplicates: false,
+      });
+
+    if (playerPointsError) {
+      throw new Error(`Failed to upsert player weekly points: ${playerPointsError.message}`);
+    }
+  }
+
   return {
     matchupsCount: matchupInserts.length,
     rostersCount: rosterInserts.length,
+    playerPointsCount: playerPointsInserts.length,
   };
 }
 
@@ -171,14 +211,16 @@ Deno.serve(async (req: Request) => {
 
     let totalMatchups = 0;
     let totalRosters = 0;
+    let totalPlayerPoints = 0;
     const weeksProcessed: number[] = [];
 
     if (body.backfill) {
       // Backfill all weeks from 1 to targetWeek
       for (let week = 1; week <= targetWeek; week++) {
-        const { matchupsCount, rostersCount } = await syncWeek(supabase, season, week);
+        const { matchupsCount, rostersCount, playerPointsCount } = await syncWeek(supabase, season, week);
         totalMatchups += matchupsCount;
         totalRosters += rostersCount;
+        totalPlayerPoints += playerPointsCount;
         weeksProcessed.push(week);
 
         // Small delay between weeks to avoid rate limiting
@@ -188,9 +230,10 @@ Deno.serve(async (req: Request) => {
       }
     } else {
       // Single week sync
-      const { matchupsCount, rostersCount } = await syncWeek(supabase, season, targetWeek);
+      const { matchupsCount, rostersCount, playerPointsCount } = await syncWeek(supabase, season, targetWeek);
       totalMatchups = matchupsCount;
       totalRosters = rostersCount;
+      totalPlayerPoints = playerPointsCount;
       weeksProcessed.push(targetWeek);
     }
 
@@ -202,6 +245,7 @@ Deno.serve(async (req: Request) => {
       weeks_processed: weeksProcessed,
       matchups_synced: totalMatchups,
       rosters_synced: totalRosters,
+      player_points_synced: totalPlayerPoints,
       duration_ms: duration,
       timestamp: new Date().toISOString(),
     };
