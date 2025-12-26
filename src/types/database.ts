@@ -54,7 +54,6 @@ export type Database = {
           id: number
           matchup_id: number
           players: string[]
-          players_points: Json | null
           points: number | null
           roster_id: number
           season_id: number
@@ -68,7 +67,6 @@ export type Database = {
           id?: number
           matchup_id: number
           players: string[]
-          players_points?: Json | null
           points?: number | null
           roster_id: number
           season_id: number
@@ -82,7 +80,6 @@ export type Database = {
           id?: number
           matchup_id?: number
           players?: string[]
-          players_points?: Json | null
           points?: number | null
           roster_id?: number
           season_id?: number
