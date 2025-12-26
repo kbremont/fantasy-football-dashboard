@@ -197,14 +197,35 @@ export function Matchups() {
       setGotwExpanded(false)
 
       try {
-        // Fetch matchups for the selected week (now including player data)
+        // Fetch matchups for the selected week
         const { data: matchupsData, error: matchupsError } = await supabase
           .from('matchups')
-          .select('roster_id, matchup_id, points, players_points, players, starters')
+          .select('roster_id, matchup_id, points, players, starters')
           .eq('season_id', selectedSeasonId!)
           .eq('week', selectedWeek)
 
         if (matchupsError) throw matchupsError
+
+        // Fetch player weekly points from the normalized table
+        const { data: playerWeeklyPoints, error: playerPointsError } = await supabase
+          .from('player_weekly_points')
+          .select('player_id, roster_id, points, is_starter')
+          .eq('season_id', selectedSeasonId!)
+          .eq('week', selectedWeek)
+
+        if (playerPointsError) throw playerPointsError
+
+        // Build a lookup map: roster_id -> player_id -> { points, is_starter }
+        const playerPointsLookup = new Map<number, Map<string, { points: number; is_starter: boolean }>>()
+        playerWeeklyPoints?.forEach((pp) => {
+          if (!playerPointsLookup.has(pp.roster_id)) {
+            playerPointsLookup.set(pp.roster_id, new Map())
+          }
+          playerPointsLookup.get(pp.roster_id)!.set(pp.player_id, {
+            points: pp.points ?? 0,
+            is_starter: pp.is_starter,
+          })
+        })
 
         // Fetch rosters for team names
         const { data: rosters, error: rostersError } = await supabase
@@ -296,15 +317,22 @@ export function Matchups() {
             else winner = 'tie'
           }
 
-          // Build player arrays for each team
+          // Build player arrays for each team using the player_weekly_points lookup
           const buildPlayerArray = (
+            rosterId: number,
             players: string[] | null,
-            starters: string[] | null,
-            playersPoints: Record<string, number> | null
+            starters: string[] | null
           ): PlayerPoints[] => {
             if (!players) return []
             const startersSet = new Set(starters || [])
+            const rosterPointsMap = playerPointsLookup.get(rosterId)
+
             return players.map((playerId) => {
+              const playerPointsData = rosterPointsMap?.get(playerId)
+              const points = playerPointsData?.points ?? 0
+              // Use is_starter from the normalized table if available, otherwise fall back to starters array
+              const isStarter = playerPointsData?.is_starter ?? startersSet.has(playerId)
+
               // Defense IDs are team abbreviations (e.g., "SEA", "CHI")
               if (isDefenseId(playerId)) {
                 return {
@@ -312,8 +340,8 @@ export function Matchups() {
                   full_name: playerId, // Use the team abbreviation as the name
                   position: 'DEF',
                   team: null,
-                  points: playersPoints?.[playerId] ?? 0,
-                  isStarter: startersSet.has(playerId),
+                  points,
+                  isStarter,
                 }
               }
               const playerInfo = nflPlayersMap.get(playerId)
@@ -322,8 +350,8 @@ export function Matchups() {
                 full_name: playerInfo?.full_name || `Player ${playerId}`,
                 position: playerInfo?.position || null,
                 team: playerInfo?.team || null,
-                points: playersPoints?.[playerId] ?? 0,
-                isStarter: startersSet.has(playerId),
+                points,
+                isStarter,
               }
             })
           }
@@ -334,13 +362,13 @@ export function Matchups() {
               roster_id: m1.roster_id,
               team_name: rosterNames.get(m1.roster_id) || `Team ${m1.roster_id}`,
               points: points1,
-              players: buildPlayerArray(m1.players, m1.starters, m1.players_points as Record<string, number> | null),
+              players: buildPlayerArray(m1.roster_id, m1.players, m1.starters),
             },
             team2: {
               roster_id: m2.roster_id,
               team_name: rosterNames.get(m2.roster_id) || `Team ${m2.roster_id}`,
               points: points2,
-              players: buildPlayerArray(m2.players, m2.starters, m2.players_points as Record<string, number> | null),
+              players: buildPlayerArray(m2.roster_id, m2.players, m2.starters),
             },
             winner,
           })

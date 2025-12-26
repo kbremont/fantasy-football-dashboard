@@ -163,6 +163,47 @@ export type Database = {
         }
         Relationships: []
       }
+      player_weekly_points: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_starter: boolean
+          player_id: string
+          points: number | null
+          roster_id: number
+          season_id: number
+          week: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_starter?: boolean
+          player_id: string
+          points?: number | null
+          roster_id: number
+          season_id: number
+          week: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_starter?: boolean
+          player_id?: string
+          points?: number | null
+          roster_id?: number
+          season_id?: number
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_weekly_points_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rosters: {
         Row: {
           created_at: string | null
