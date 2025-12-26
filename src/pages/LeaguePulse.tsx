@@ -514,6 +514,11 @@ interface LeagueRecordsCardProps {
   onSeasonChange: (value: number | 'all') => void
 }
 
+// Helper to format season year as "2024-25" instead of "2024"
+function formatSeasonYear(year: number): string {
+  return `${year}-${(year + 1).toString().slice(-2)}`
+}
+
 function LeagueRecordsCard({
   records,
   seasons,
@@ -565,7 +570,7 @@ function LeagueRecordsCard({
               team={records.highestScore?.team_name || '—'}
               context={
                 records.highestScore
-                  ? `${records.highestScore.season_year} Week ${records.highestScore.week}`
+                  ? `${formatSeasonYear(records.highestScore.season_year)} Week ${records.highestScore.week}`
                   : ''
               }
               color="primary"
@@ -579,7 +584,7 @@ function LeagueRecordsCard({
               team={records.lowestScore?.team_name || '—'}
               context={
                 records.lowestScore
-                  ? `${records.lowestScore.season_year} Week ${records.lowestScore.week}`
+                  ? `${formatSeasonYear(records.lowestScore.season_year)} Week ${records.lowestScore.week}`
                   : ''
               }
               color="destructive"
@@ -593,7 +598,7 @@ function LeagueRecordsCard({
               team={records.lowestWinningScore?.team_name || '—'}
               context={
                 records.lowestWinningScore
-                  ? `${records.lowestWinningScore.season_year} Week ${records.lowestWinningScore.week}`
+                  ? `${formatSeasonYear(records.lowestWinningScore.season_year)} Week ${records.lowestWinningScore.week}`
                   : ''
               }
               color="accent"
@@ -607,7 +612,7 @@ function LeagueRecordsCard({
               team={records.biggestBlowout?.winner || '—'}
               context={
                 records.biggestBlowout
-                  ? `vs ${records.biggestBlowout.loser} (${records.biggestBlowout.season_year} Wk ${records.biggestBlowout.week})`
+                  ? `vs ${records.biggestBlowout.loser} (${formatSeasonYear(records.biggestBlowout.season_year)} Wk ${records.biggestBlowout.week})`
                   : ''
               }
               color="orange"
@@ -621,7 +626,7 @@ function LeagueRecordsCard({
               team={records.closestGame?.winner || '—'}
               context={
                 records.closestGame
-                  ? `vs ${records.closestGame.loser} (${records.closestGame.season_year} Wk ${records.closestGame.week})`
+                  ? `vs ${records.closestGame.loser} (${formatSeasonYear(records.closestGame.season_year)} Wk ${records.closestGame.week})`
                   : ''
               }
               color="purple"
@@ -633,7 +638,7 @@ function LeagueRecordsCard({
               label="Longest Win Streak"
               value={records.longestWinStreak ? `${records.longestWinStreak.streak} wins` : '—'}
               team={records.longestWinStreak?.team_name || '—'}
-              context={records.longestWinStreak ? `${records.longestWinStreak.season_year} season` : ''}
+              context={records.longestWinStreak ? `${formatSeasonYear(records.longestWinStreak.season_year)} season` : ''}
               color="blue"
             />
           </div>
