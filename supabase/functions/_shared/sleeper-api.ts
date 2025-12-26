@@ -105,6 +105,7 @@ export interface SleeperMatchup {
   players: string[];
   points: number | null;
   custom_points: number | null;
+  players_points: Record<string, number> | null;
 }
 
 export interface SleeperTransaction {
