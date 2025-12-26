@@ -110,15 +110,15 @@ export function RankingTrendChart({ rankings }: RankingTrendChartProps) {
       >
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="hsl(222, 47%, 16%)"
+          stroke="hsl(220, 15%, 18%)"
           strokeOpacity={0.5}
         />
         <XAxis
           dataKey="week"
           stroke="hsl(215, 20%, 55%)"
           tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 12 }}
-          axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-          tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+          axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+          tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
           label={{
             value: 'Week',
             position: 'insideBottomRight',
@@ -132,8 +132,8 @@ export function RankingTrendChart({ rankings }: RankingTrendChartProps) {
           domain={[1, rankings.length]}
           stroke="hsl(215, 20%, 55%)"
           tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 12 }}
-          axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-          tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+          axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+          tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
           tickFormatter={(value) => `#${value}`}
           width={40}
         />
@@ -161,7 +161,7 @@ export function RankingTrendChart({ rankings }: RankingTrendChartProps) {
             activeDot={{
               r: 5,
               fill: CHART_COLORS[index % CHART_COLORS.length],
-              stroke: 'hsl(222, 47%, 6%)',
+              stroke: 'hsl(220, 20%, 7%)',
               strokeWidth: 2,
             }}
           />

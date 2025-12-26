@@ -174,10 +174,10 @@ export function Rivals() {
       {/* Header */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between animate-fade-up">
         <div>
-          <p className="text-sm font-medium text-primary uppercase tracking-widest mb-2">
+          <p className="text-sm font-medium text-primary uppercase tracking-wider mb-2">
             Head-to-Head History
           </p>
-          <h1 className="text-5xl md:text-6xl font-display tracking-wide text-gradient">
+          <h1 className="text-4xl md:text-5xl font-display tracking-wide text-foreground">
             RIVALRY TRACKER
           </h1>
         </div>
@@ -264,7 +264,7 @@ export function Rivals() {
 
       {/* Initial Loading State */}
       {initialLoading && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-1">
+        <Card className="border-border bg-card animate-fade-up stagger-1">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -276,7 +276,7 @@ export function Rivals() {
 
       {/* No Teams Selected State */}
       {!initialLoading && (!selectedTeamA || !selectedTeamB) && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-1 overflow-hidden">
+        <Card className="border-border bg-card animate-fade-up stagger-1 overflow-hidden">
           <div className="relative">
             {/* Background gradient effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
@@ -316,7 +316,7 @@ export function Rivals() {
 
       {/* Loading Rivalry Data */}
       {loading && selectedTeamA && selectedTeamB && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-1">
+        <Card className="border-border bg-card animate-fade-up stagger-1">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -347,7 +347,7 @@ export function Rivals() {
 
           {/* Momentum Chart */}
           {rivalryStats.matchupHistory.length > 1 && (
-            <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-4 overflow-hidden">
+            <Card className="border-border bg-card animate-fade-up stagger-4 overflow-hidden">
               <CardHeader className="border-b border-border/30 bg-secondary/20">
                 <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
                   <TrendingUp className="w-5 h-5 text-primary" />
@@ -391,7 +391,7 @@ export function Rivals() {
 
           {/* No Matchups Found */}
           {rivalryStats.matchupHistory.length === 0 && (
-            <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-2">
+            <Card className="border-border bg-card animate-fade-up stagger-2">
               <CardContent className="py-16">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <Shield className="w-12 h-12 text-muted-foreground/50" />
@@ -428,7 +428,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
   const { teamAWins, teamBWins, ties, totalGames } = stats.allTimeRecord
 
   return (
-    <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up stagger-2">
+    <Card className="border-border bg-card overflow-hidden animate-fade-up stagger-2">
       <div className="relative">
         {/* Spotlight effect behind VS */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -447,7 +447,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
               )}
             >
               {dominantTeam === 'teamA' && (
-                <div className="absolute top-3 left-3 animate-pulse">
+                <div className="absolute top-3 left-3 ">
                   <Crown className="w-5 h-5 text-primary" />
                 </div>
               )}
@@ -461,7 +461,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
                 <p
                   className={cn(
                     'text-5xl font-display tabular-nums transition-all',
-                    dominantTeam === 'teamA' ? 'text-primary glow-primary-text' : 'text-foreground'
+                    dominantTeam === 'teamA' ? 'text-primary ' : 'text-foreground'
                   )}
                 >
                   {teamAWins}
@@ -510,7 +510,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
               )}
             >
               {dominantTeam === 'teamB' && (
-                <div className="absolute top-3 right-3 animate-pulse">
+                <div className="absolute top-3 right-3 ">
                   <Crown className="w-5 h-5 text-accent" />
                 </div>
               )}
@@ -524,7 +524,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
                 <p
                   className={cn(
                     'text-5xl font-display tabular-nums transition-all',
-                    dominantTeam === 'teamB' ? 'text-accent glow-gold-text' : 'text-foreground'
+                    dominantTeam === 'teamB' ? 'text-accent ' : 'text-foreground'
                   )}
                 >
                   {teamBWins}
@@ -547,7 +547,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
               )}
             >
               {dominantTeam === 'teamA' && (
-                <div className="absolute top-4 left-4 animate-pulse">
+                <div className="absolute top-4 left-4 ">
                   <Crown className="w-6 h-6 text-primary" />
                 </div>
               )}
@@ -561,7 +561,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
                 <p
                   className={cn(
                     'text-6xl md:text-7xl font-display tabular-nums transition-all',
-                    dominantTeam === 'teamA' ? 'text-primary glow-primary-text' : 'text-foreground'
+                    dominantTeam === 'teamA' ? 'text-primary ' : 'text-foreground'
                   )}
                 >
                   {teamAWins}
@@ -610,7 +610,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
               )}
             >
               {dominantTeam === 'teamB' && (
-                <div className="absolute top-4 right-4 animate-pulse">
+                <div className="absolute top-4 right-4 ">
                   <Crown className="w-6 h-6 text-accent" />
                 </div>
               )}
@@ -624,7 +624,7 @@ function HeroVSSection({ teamAName, teamBName, stats, dominantTeam, seasonLabel 
                 <p
                   className={cn(
                     'text-6xl md:text-7xl font-display tabular-nums transition-all',
-                    dominantTeam === 'teamB' ? 'text-accent glow-gold-text' : 'text-foreground'
+                    dominantTeam === 'teamB' ? 'text-accent ' : 'text-foreground'
                   )}
                 >
                   {teamBWins}
@@ -684,7 +684,7 @@ function TaleOfTheTape({ teamAName, teamBName, stats }: TaleOfTheTapeProps) {
   ]
 
   return (
-    <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-3 overflow-hidden">
+    <Card className="border-border bg-card animate-fade-up stagger-3 overflow-hidden">
       <CardHeader className="border-b border-border/30 bg-secondary/20">
         <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
           <Target className="w-5 h-5 text-primary" />
@@ -770,7 +770,7 @@ function BiggestBlowoutsCard({ teamAName, teamBName, blowouts }: BiggestBlowouts
   if (!blowouts.teamA && !blowouts.teamB) return null
 
   return (
-    <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-5 overflow-hidden">
+    <Card className="border-border bg-card animate-fade-up stagger-5 overflow-hidden">
       <CardHeader className="border-b border-border/30 bg-secondary/20">
         <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
           <Zap className="w-5 h-5 text-destructive" />
@@ -878,7 +878,7 @@ interface ClosestGamesCardProps {
 
 function ClosestGamesCard({ teamAName, teamBName, games }: ClosestGamesCardProps) {
   return (
-    <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-6 overflow-hidden">
+    <Card className="border-border bg-card animate-fade-up stagger-6 overflow-hidden">
       <CardHeader className="border-b border-border/30 bg-secondary/20">
         <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
           <Timer className="w-5 h-5 text-accent" />
@@ -948,7 +948,7 @@ interface RevengeGamesCardProps {
 
 function RevengeGamesCard({ teamAName, teamBName, revengeGames }: RevengeGamesCardProps) {
   return (
-    <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-7 overflow-hidden">
+    <Card className="border-border bg-card animate-fade-up stagger-7 overflow-hidden">
       <CardHeader className="border-b border-border/30 bg-secondary/20">
         <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
           <Flame className="w-5 h-5 text-orange-500" />

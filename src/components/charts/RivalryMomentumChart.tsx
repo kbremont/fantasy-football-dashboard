@@ -145,7 +145,7 @@ export function RivalryMomentumChart({
 
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="hsl(222, 47%, 16%)"
+            stroke="hsl(220, 15%, 18%)"
             strokeOpacity={0.5}
             vertical={false}
           />
@@ -154,16 +154,16 @@ export function RivalryMomentumChart({
             dataKey="label"
             stroke="hsl(215, 20%, 55%)"
             tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 11 }}
-            axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-            tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+            axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+            tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
             interval="preserveStartEnd"
           />
 
           <YAxis
             stroke="hsl(215, 20%, 55%)"
             tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 11 }}
-            axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-            tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+            axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+            tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
             tickFormatter={(value) => {
               if (value === 0) return '0'
               return value > 0 ? `+${value}` : `${value}`
@@ -195,7 +195,7 @@ export function RivalryMomentumChart({
             activeDot={{
               r: 6,
               fill: 'hsl(142, 76%, 46%)',
-              stroke: 'hsl(222, 47%, 6%)',
+              stroke: 'hsl(220, 20%, 7%)',
               strokeWidth: 2,
             }}
           />
@@ -215,7 +215,7 @@ export function RivalryMomentumChart({
             activeDot={{
               r: 6,
               fill: 'hsl(38, 92%, 55%)',
-              stroke: 'hsl(222, 47%, 6%)',
+              stroke: 'hsl(220, 20%, 7%)',
               strokeWidth: 2,
             }}
           />

@@ -246,7 +246,7 @@ export function Standings() {
 
     if (rank === 1) {
       return (
-        <div className={cn(baseClasses, 'bg-yellow-500 text-yellow-950 glow-gold')}>
+        <div className={cn(baseClasses, 'bg-yellow-500 text-yellow-950')}>
           <Trophy className="w-4 h-4" />
         </div>
       )
@@ -371,10 +371,10 @@ export function Standings() {
       {/* Header */}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div>
-          <p className="text-sm font-medium text-primary uppercase tracking-widest mb-2">
+          <p className="text-sm font-medium text-primary uppercase tracking-wider mb-2">
             League Rankings
           </p>
-          <h1 className="text-5xl md:text-6xl font-display tracking-wide text-gradient">
+          <h1 className="text-4xl md:text-5xl font-display tracking-wide text-foreground">
             STANDINGS
           </h1>
         </div>
@@ -411,7 +411,7 @@ export function Standings() {
 
       {/* Loading State */}
       {loading && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur">
+        <Card className="border-border bg-card">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -423,7 +423,7 @@ export function Standings() {
 
       {/* Standings Table */}
       {!loading && !error && standings.length > 0 && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-1">
+        <Card className="border-border bg-card animate-fade-up stagger-1">
           <CardHeader className="border-b border-border/30 bg-secondary/30">
             <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
               <Trophy className="w-5 h-5 text-primary" />
@@ -567,15 +567,15 @@ export function Standings() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-right py-4 tabular-nums font-medium">
+                      <TableCell className="text-right py-4 font-display tabular-nums">
                         {formatPoints(team.points_for)}
                       </TableCell>
-                      <TableCell className="text-right py-4 tabular-nums text-muted-foreground">
+                      <TableCell className="text-right py-4 font-display tabular-nums text-muted-foreground">
                         {formatPoints(team.points_against)}
                       </TableCell>
                       <TableCell className="text-right py-4">
                         <span className={cn(
-                          'tabular-nums font-medium',
+                          'font-display tabular-nums',
                           diff > 0 && 'text-primary',
                           diff < 0 && 'text-destructive',
                           diff === 0 && 'text-muted-foreground'
@@ -596,7 +596,7 @@ export function Standings() {
 
       {/* Empty State */}
       {!loading && !error && standings.length === 0 && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur">
+        <Card className="border-border bg-card">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4 text-center">
               <Trophy className="w-12 h-12 text-muted-foreground/50" />

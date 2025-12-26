@@ -41,15 +41,15 @@ export function Layout() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-primary transition-all duration-300 group-hover:scale-105">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center transition-all duration-200 group-hover:bg-primary/90">
                 <Trophy className="w-5 h-5 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="font-display text-xl tracking-wide text-foreground">
                   GREASY GOOBLINS
                 </h1>
-                <p className="text-[10px] text-muted-foreground tracking-[0.3em] -mt-0.5">
-                  LEAGUE DASHBOARD
+                <p className="text-[10px] text-muted-foreground tracking-wide -mt-0.5">
+                  League Dashboard
                 </p>
               </div>
             </Link>
@@ -74,7 +74,7 @@ export function Layout() {
                     <Icon className="w-4 h-4" />
                     <span>{item.label}</span>
                     {isActive && (
-                      <span className="absolute inset-x-0 -bottom-[1px] h-0.5 bg-gradient-to-r from-primary to-accent rounded-full" />
+                      <span className="absolute inset-x-0 -bottom-[1px] h-0.5 bg-primary rounded-full" />
                     )}
                   </Link>
                 )
@@ -119,8 +119,6 @@ export function Layout() {
           )}
         >
           <nav className="bg-background/95 backdrop-blur-xl border-b border-border/40">
-            {/* Gradient accent line */}
-            <div className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
             <div className="container mx-auto px-4 py-3">
               <div className="flex flex-col gap-1">
@@ -163,16 +161,13 @@ export function Layout() {
                         )}
                       </div>
                       {isActive && (
-                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary glow-primary" />
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                       )}
                     </Link>
                   )
                 })}
               </div>
             </div>
-
-            {/* Bottom gradient fade */}
-            <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
           </nav>
         </div>
       </header>

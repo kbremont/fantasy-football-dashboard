@@ -101,7 +101,7 @@ export function WeeklyTrendChart({ trends }: WeeklyTrendChartProps) {
 
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="hsl(222, 47%, 16%)"
+          stroke="hsl(220, 15%, 18%)"
           strokeOpacity={0.5}
         />
 
@@ -109,8 +109,8 @@ export function WeeklyTrendChart({ trends }: WeeklyTrendChartProps) {
           dataKey="week"
           stroke="hsl(215, 20%, 55%)"
           tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 12 }}
-          axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-          tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+          axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+          tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
           label={{
             value: 'Week',
             position: 'insideBottomRight',
@@ -124,8 +124,8 @@ export function WeeklyTrendChart({ trends }: WeeklyTrendChartProps) {
           domain={[minScore, maxScore]}
           stroke="hsl(215, 20%, 55%)"
           tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 12 }}
-          axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-          tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+          axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+          tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
           width={50}
           tickFormatter={(value) => `${value}`}
         />
@@ -174,7 +174,7 @@ export function WeeklyTrendChart({ trends }: WeeklyTrendChartProps) {
           activeDot={{
             r: 5,
             fill: 'hsl(38, 92%, 55%)',
-            stroke: 'hsl(222, 47%, 6%)',
+            stroke: 'hsl(220, 20%, 7%)',
             strokeWidth: 2,
           }}
         />
@@ -194,7 +194,7 @@ export function WeeklyTrendChart({ trends }: WeeklyTrendChartProps) {
           activeDot={{
             r: 6,
             fill: 'hsl(142, 76%, 46%)',
-            stroke: 'hsl(222, 47%, 6%)',
+            stroke: 'hsl(220, 20%, 7%)',
             strokeWidth: 2,
           }}
         />
@@ -215,7 +215,7 @@ export function WeeklyTrendChart({ trends }: WeeklyTrendChartProps) {
           activeDot={{
             r: 5,
             fill: 'hsl(0, 72%, 51%)',
-            stroke: 'hsl(222, 47%, 6%)',
+            stroke: 'hsl(220, 20%, 7%)',
             strokeWidth: 2,
           }}
         />
