@@ -267,9 +267,6 @@ export function Home() {
               <h2 className="font-display text-3xl sm:text-4xl tracking-wide text-gradient">
                 DESTINATION DRAFTS
               </h2>
-              <p className="text-muted-foreground text-sm tracking-wide mt-0.5">
-                Where the magic happens
-              </p>
             </div>
           </div>
           <div className="flex-1 h-px bg-gradient-to-r from-border/50 to-transparent hidden sm:block" />
