@@ -73,6 +73,76 @@ function batchArray<T>(array: T[], batchSize: number): T[][] {
 }
 
 /**
+ * Detects team changes and records them in player_team_history
+ * @param supabase - Supabase client
+ * @param incomingPlayers - Players from Sleeper API
+ * @returns Object with teamChanges count and any errors
+ */
+async function recordTeamChanges(
+  supabase: ReturnType<typeof createClient<Database>>,
+  incomingPlayers: NFLPlayerInsert[]
+): Promise<{ teamChanges: number; errors: string[] }> {
+  const errors: string[] = [];
+
+  // Get current teams from nfl_players
+  const playerIds = incomingPlayers.map(p => p.player_id);
+  const { data: currentPlayers, error: fetchError } = await supabase
+    .from('nfl_players')
+    .select('player_id, team')
+    .in('player_id', playerIds);
+
+  if (fetchError) {
+    errors.push(`Failed to fetch current players: ${fetchError.message}`);
+    return { teamChanges: 0, errors };
+  }
+
+  // Build lookup of current teams
+  const currentTeams = new Map<string, string | null>(
+    currentPlayers?.map(p => [p.player_id, p.team]) || []
+  );
+
+  // Find players whose team has changed
+  const teamChanges: { player_id: string; team: string | null; effective_date: string; source: string }[] = [];
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
+  for (const player of incomingPlayers) {
+    const currentTeam = currentTeams.get(player.player_id);
+
+    // Only record if:
+    // 1. Player exists in current data (we have a baseline)
+    // 2. Team has actually changed (including to/from null)
+    if (currentTeams.has(player.player_id) && currentTeam !== player.team) {
+      teamChanges.push({
+        player_id: player.player_id,
+        team: player.team,
+        effective_date: today,
+        source: 'daily_sync',
+      });
+    }
+  }
+
+  if (teamChanges.length === 0) {
+    return { teamChanges: 0, errors };
+  }
+
+  console.log(`Detected ${teamChanges.length} team changes, recording to history...`);
+
+  // Insert team changes in batches
+  const changeBatches = batchArray(teamChanges, BATCH_SIZE);
+  for (const batch of changeBatches) {
+    const { error: insertError } = await supabase
+      .from('player_team_history')
+      .insert(batch);
+
+    if (insertError) {
+      errors.push(`Failed to insert team history: ${insertError.message}`);
+    }
+  }
+
+  return { teamChanges: teamChanges.length, errors };
+}
+
+/**
  * Main edge function handler
  * Fetches NFL players from Sleeper API and upserts them to Supabase
  */
@@ -126,12 +196,18 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 4. Batch upsert to Supabase
+    // 4. Record team changes BEFORE upserting (so we can compare old vs new)
+    const { teamChanges, errors: historyErrors } = await recordTeamChanges(supabase, players);
+    if (teamChanges > 0) {
+      console.log(`Recorded ${teamChanges} team changes to history`);
+    }
+
+    // 5. Batch upsert to Supabase
     const batches = batchArray(players, BATCH_SIZE);
     console.log(`Upserting in ${batches.length} batch(es)...`);
 
     let totalUpserted = 0;
-    const errors: string[] = [];
+    const errors: string[] = [...historyErrors];
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
@@ -153,13 +229,14 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // 5. Return response
+    // 6. Return response
     const duration = Date.now() - startTime;
     const response = {
       success: errors.length === 0,
       playersProcessed: totalUpserted,
       totalPlayers: players.length,
       batchesProcessed: batches.length,
+      teamChangesRecorded: teamChanges,
       errors: errors.length > 0 ? errors : undefined,
       durationMs: duration,
       timestamp: new Date().toISOString(),
