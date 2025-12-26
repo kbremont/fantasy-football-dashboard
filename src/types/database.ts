@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      draft_media: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          display_order: number | null
+          id: number
+          media_type: string | null
+          storage_path: string
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: number
+          media_type?: string | null
+          storage_path: string
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: number
+          media_type?: string | null
+          storage_path?: string
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       matchups: {
         Row: {
           created_at: string | null
@@ -21,6 +54,7 @@ export type Database = {
           id: number
           matchup_id: number
           players: string[]
+          players_points: Json | null
           points: number | null
           roster_id: number
           season_id: number
@@ -34,6 +68,7 @@ export type Database = {
           id?: number
           matchup_id: number
           players: string[]
+          players_points?: Json | null
           points?: number | null
           roster_id: number
           season_id: number
@@ -47,6 +82,7 @@ export type Database = {
           id?: number
           matchup_id?: number
           players?: string[]
+          players_points?: Json | null
           points?: number | null
           roster_id?: number
           season_id?: number
