@@ -63,7 +63,6 @@ async function syncMatchupsForWeek(
     players: m.players || [],
     points: m.points,
     custom_points: m.custom_points,
-    players_points: m.players_points,
   }));
 
   const rosterInserts = activeMatchups.map((m: SleeperMatchup) => ({
