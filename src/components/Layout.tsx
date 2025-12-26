@@ -116,7 +116,7 @@ export function Layout() {
         <div
           className={cn(
             'md:hidden absolute left-0 right-0 top-full overflow-hidden transition-all duration-300 ease-out',
-            isMenuOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+            isMenuOpen ? 'max-h-[calc(100vh-4rem)] opacity-100' : 'max-h-0 opacity-0'
           )}
         >
           <nav className="bg-background/95 backdrop-blur-xl border-b border-border/40">
