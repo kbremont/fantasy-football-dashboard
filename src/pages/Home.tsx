@@ -20,7 +20,7 @@ interface DestinationDraft {
 // Placeholder data - update with actual draft information
 const DESTINATION_DRAFTS: DestinationDraft[] = [
   { year: 2025, location: 'Playa Del Carmen, MX', winner: 'TBD', hasGallery: true },
-  { year: 2024, location: 'Hollywood, FL', winner: 'Baker', hasGallery: false },
+  { year: 2024, location: 'Hollywood, FL', winner: 'Baker', hasGallery: true },
   { year: 2023, location: 'Virtual', winner: 'Steffer', hasGallery: false },
 ]
 
