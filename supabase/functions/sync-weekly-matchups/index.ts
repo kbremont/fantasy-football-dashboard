@@ -26,6 +26,7 @@ interface MatchupInsert {
   players: string[];
   points: number | null;
   custom_points: number | null;
+  players_points: Record<string, number> | null;
 }
 
 interface WeeklyRosterInsert {
@@ -61,6 +62,7 @@ function transformMatchups(
       players: matchup.players || [],
       points: matchup.points,
       custom_points: matchup.custom_points,
+      players_points: matchup.players_points,
     });
 
     // Weekly roster snapshot insert
