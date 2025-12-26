@@ -84,17 +84,28 @@ async function recordTeamChanges(
 ): Promise<{ teamChanges: number; errors: string[] }> {
   const errors: string[] = [];
 
-  // Get current teams from nfl_players
+  // Get current teams from nfl_players in batches to avoid URL length limits
   const playerIds = incomingPlayers.map(p => p.player_id);
-  const { data: currentPlayers, error: fetchError } = await supabase
-    .from('nfl_players')
-    .select('player_id, team')
-    .in('player_id', playerIds);
+  const idBatches = batchArray(playerIds, BATCH_SIZE);
+  const allCurrentPlayers: { player_id: string; team: string | null }[] = [];
 
-  if (fetchError) {
-    errors.push(`Failed to fetch current players: ${fetchError.message}`);
-    return { teamChanges: 0, errors };
+  for (const idBatch of idBatches) {
+    const { data: batchPlayers, error: fetchError } = await supabase
+      .from('nfl_players')
+      .select('player_id, team')
+      .in('player_id', idBatch);
+
+    if (fetchError) {
+      errors.push(`Failed to fetch current players: ${fetchError.message}`);
+      return { teamChanges: 0, errors };
+    }
+
+    if (batchPlayers) {
+      allCurrentPlayers.push(...batchPlayers);
+    }
   }
+
+  const currentPlayers = allCurrentPlayers;
 
   // Build lookup of current teams
   const currentTeams = new Map<string, string | null>(
