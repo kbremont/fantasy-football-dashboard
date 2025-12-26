@@ -9,8 +9,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Calendar, ChevronLeft, ChevronRight, Crown, Swords } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Crown, Swords, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  findGameOfTheWeek,
+  formatPoints as formatPulsePoints,
+  formatMargin,
+  type GameOfTheWeek,
+  type MatchupPairData,
+} from '@/lib/league-pulse'
 
 interface Season {
   id: number
@@ -42,6 +49,7 @@ export function Matchups() {
   const [maxWeek, setMaxWeek] = useState<number>(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [gameOfTheWeek, setGameOfTheWeek] = useState<GameOfTheWeek | null>(null)
 
   // Fetch seasons on mount
   useEffect(() => {
@@ -169,6 +177,21 @@ export function Matchups() {
         pairs.sort((a, b) => a.matchup_id - b.matchup_id)
 
         setMatchups(pairs)
+
+        // Calculate game of the week (only for completed matchups with a winner)
+        const completedPairs = pairs.filter((p) => p.winner !== null)
+        const matchupPairData: MatchupPairData[] = completedPairs.map((p) => ({
+          matchup_id: p.matchup_id,
+          week: selectedWeek,
+          season_id: selectedSeasonId!,
+          season_year: seasons.find((s) => s.id === selectedSeasonId)?.season_year || 0,
+          team1: p.team1,
+          team2: p.team2,
+          winner: p.winner as 'team1' | 'team2' | 'tie',
+          margin: Math.abs(p.team1.points - p.team2.points),
+        }))
+        const gotw = findGameOfTheWeek(matchupPairData, selectedWeek)
+        setGameOfTheWeek(gotw)
       } catch (err) {
         console.error(err)
         setError('Failed to load matchups')
@@ -178,7 +201,7 @@ export function Matchups() {
     }
 
     fetchMatchups()
-  }, [selectedSeasonId, selectedWeek])
+  }, [selectedSeasonId, selectedWeek, seasons])
 
   const formatPoints = (points: number) => {
     return points.toLocaleString('en-US', {
@@ -292,6 +315,11 @@ export function Matchups() {
           )}
         </h2>
       </div>
+
+      {/* Game of the Week */}
+      {!loading && !error && gameOfTheWeek && (
+        <GameOfTheWeekCard gameOfTheWeek={gameOfTheWeek} />
+      )}
 
       {/* Error State */}
       {error && (
@@ -448,5 +476,135 @@ export function Matchups() {
         </Card>
       )}
     </div>
+  )
+}
+
+// =============================================================================
+// GAME OF THE WEEK CARD
+// =============================================================================
+
+interface GameOfTheWeekCardProps {
+  gameOfTheWeek: GameOfTheWeek
+}
+
+function GameOfTheWeekCard({ gameOfTheWeek }: GameOfTheWeekCardProps) {
+  const { matchup, reason } = gameOfTheWeek
+
+  const isTeam1Winner = matchup.winner === 'team1'
+  const isTeam2Winner = matchup.winner === 'team2'
+  const isTie = matchup.winner === 'tie'
+
+  // Badge color based on reason
+  const badgeStyles: Record<string, string> = {
+    'Photo Finish': 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+    'Nail-biter': 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white',
+    Shootout: 'bg-gradient-to-r from-orange-500 to-red-500 text-white',
+    'Classic Clash': 'bg-gradient-to-r from-primary to-accent text-white',
+    'Statement Win': 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white',
+  }
+
+  return (
+    <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up stagger-3">
+      <div className="relative">
+        {/* Radial spotlight */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-96 h-96 rounded-full bg-gradient-radial from-white/5 to-transparent" />
+        </div>
+
+        <CardContent className="p-0">
+          {/* Header badge */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b border-border/30 bg-secondary/20">
+            <div className="flex items-center gap-3">
+              <Trophy className="w-5 h-5 text-accent" />
+              <span className="font-display text-base sm:text-lg tracking-wide">GAME OF THE WEEK</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={cn('px-3 py-1 rounded-full text-xs font-semibold', badgeStyles[reason])}>
+                {reason.toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          {/* VS Layout */}
+          <div className="grid grid-cols-[1fr_auto_1fr] min-h-[160px] sm:min-h-[180px]">
+            {/* Team 1 */}
+            <div
+              className={cn(
+                'relative p-4 sm:p-6 flex flex-col items-center justify-center transition-all duration-500',
+                isTeam1Winner && 'bg-gradient-to-br from-primary/20 via-primary/10 to-transparent'
+              )}
+            >
+              {isTeam1Winner && (
+                <div className="absolute top-2 left-2 sm:top-4 sm:left-4">
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary animate-pulse" />
+                </div>
+              )}
+              <div className="text-center space-y-2 sm:space-y-3">
+                <h3 className="text-sm sm:text-lg md:text-xl font-display tracking-wide text-foreground truncate max-w-[100px] sm:max-w-[180px]">
+                  {matchup.team1.team_name}
+                </h3>
+                <p
+                  className={cn(
+                    'text-2xl sm:text-4xl md:text-5xl font-display tabular-nums transition-all',
+                    isTeam1Winner
+                      ? 'text-primary glow-primary-text'
+                      : isTie
+                        ? 'text-accent'
+                        : 'text-muted-foreground'
+                  )}
+                >
+                  {formatPulsePoints(matchup.team1.points)}
+                </p>
+              </div>
+            </div>
+
+            {/* VS Badge */}
+            <div className="relative flex flex-col items-center justify-center px-3 sm:px-6 border-x border-border/20">
+              <div className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-primary via-white/50 to-accent" />
+              <div className="relative z-10 w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-background border-2 border-border/50 flex items-center justify-center shadow-xl">
+                <Swords className="w-4 h-4 sm:w-6 sm:h-6 text-foreground" />
+              </div>
+              <div className="mt-2 sm:mt-3 text-center">
+                <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">Margin</p>
+                <p className="text-sm sm:text-lg font-display text-foreground tabular-nums">
+                  {formatMargin(matchup.margin)}
+                </p>
+              </div>
+            </div>
+
+            {/* Team 2 */}
+            <div
+              className={cn(
+                'relative p-4 sm:p-6 flex flex-col items-center justify-center transition-all duration-500',
+                isTeam2Winner && 'bg-gradient-to-bl from-accent/20 via-accent/10 to-transparent'
+              )}
+            >
+              {isTeam2Winner && (
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-accent animate-pulse" />
+                </div>
+              )}
+              <div className="text-center space-y-2 sm:space-y-3">
+                <h3 className="text-sm sm:text-lg md:text-xl font-display tracking-wide text-foreground truncate max-w-[100px] sm:max-w-[180px]">
+                  {matchup.team2.team_name}
+                </h3>
+                <p
+                  className={cn(
+                    'text-2xl sm:text-4xl md:text-5xl font-display tabular-nums transition-all',
+                    isTeam2Winner
+                      ? 'text-accent glow-gold-text'
+                      : isTie
+                        ? 'text-accent'
+                        : 'text-muted-foreground'
+                  )}
+                >
+                  {formatPulsePoints(matchup.team2.points)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </div>
+    </Card>
   )
 }
