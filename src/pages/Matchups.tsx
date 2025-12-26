@@ -59,6 +59,19 @@ interface MatchupPair {
 
 const POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
+/**
+ * Calculate approximate date for an NFL week
+ * NFL regular season typically starts the Thursday after Labor Day (first Monday in September)
+ * Week 1 is around September 5-11, each subsequent week is +7 days
+ */
+function getApproximateWeekDate(seasonYear: number, week: number): string {
+  // Approximate: Week 1 starts around September 7 of the season year
+  const weekOneStart = new Date(seasonYear, 8, 7) // September 7
+  const weekDate = new Date(weekOneStart)
+  weekDate.setDate(weekDate.getDate() + (week - 1) * 7)
+  return weekDate.toISOString().split('T')[0] // YYYY-MM-DD
+}
+
 const POSITION_COLORS: Record<string, string> = {
   QB: 'bg-red-500/20 text-red-400',
   RB: 'bg-emerald-500/20 text-emerald-400',
@@ -206,7 +219,7 @@ export function Matchups() {
           m.players?.forEach((id: string) => allPlayerIds.add(id))
         })
 
-        // Fetch NFL player details
+        // Fetch NFL player details (name and position)
         let nflPlayersMap = new Map<string, { full_name: string; position: string | null; team: string | null }>()
         if (allPlayerIds.size > 0) {
           const { data: nflPlayers } = await supabase
@@ -218,6 +231,41 @@ export function Matchups() {
             nflPlayersMap = new Map(
               nflPlayers.map((p) => [p.player_id, { full_name: p.full_name, position: p.position, team: p.team }])
             )
+          }
+
+          // Fetch historical team data for point-in-time accuracy
+          const seasonYear = seasons.find((s) => s.id === selectedSeasonId)?.season_year
+          if (seasonYear) {
+            const matchupDate = getApproximateWeekDate(seasonYear, selectedWeek)
+
+            // Get all team history records for these players up to the matchup date
+            // Type assertion needed until types are regenerated after migration
+            const { data: teamHistory } = await (supabase
+              .from('player_team_history' as 'nfl_players')
+              .select('player_id, team, effective_date')
+              .in('player_id', Array.from(allPlayerIds))
+              .lte('effective_date', matchupDate)
+              .order('effective_date', { ascending: false }) as unknown as Promise<{
+                data: { player_id: string; team: string | null; effective_date: string }[] | null
+              }>)
+
+            if (teamHistory) {
+              // Build a map of player_id -> most recent team (first record for each player due to DESC order)
+              const historicalTeams = new Map<string, string | null>()
+              for (const record of teamHistory) {
+                if (!historicalTeams.has(record.player_id)) {
+                  historicalTeams.set(record.player_id, record.team)
+                }
+              }
+
+              // Override teams in nflPlayersMap with historical data
+              for (const [playerId, historicalTeam] of historicalTeams) {
+                const playerData = nflPlayersMap.get(playerId)
+                if (playerData) {
+                  nflPlayersMap.set(playerId, { ...playerData, team: historicalTeam })
+                }
+              }
+            }
           }
         }
 
