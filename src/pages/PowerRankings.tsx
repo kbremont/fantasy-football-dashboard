@@ -291,14 +291,14 @@ export function PowerRankings() {
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/20">
               <BarChart3 className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium text-primary uppercase tracking-widest">
+              <p className="text-sm font-medium text-primary uppercase tracking-wider">
                 Advanced Analytics
               </p>
-              <h1 className="text-5xl md:text-6xl font-display tracking-wide text-gradient">
+              <h1 className="text-4xl md:text-5xl font-display tracking-wide text-foreground">
                 POWER RANKINGS
               </h1>
             </div>
@@ -337,7 +337,7 @@ export function PowerRankings() {
 
       {/* Loading State */}
       {loading && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur">
+        <Card className="border-border bg-card">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
@@ -356,14 +356,13 @@ export function PowerRankings() {
           {/* Summary Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up stagger-1">
             {/* Luckiest Team */}
-            <Card className="group relative overflow-hidden border-border/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/50 backdrop-blur hover:border-primary/50 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <CardContent className="pt-6 relative">
+            <Card className="border-border bg-card hover:border-border/80 transition-colors">
+              <CardContent className="pt-6">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-primary/20 border border-primary/30">
+                  <div className="p-2 rounded-lg bg-primary/10">
                     <Zap className="w-5 h-5 text-primary" />
                   </div>
-                  <TrendingUp className="w-4 h-4 text-primary/60" />
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Luckiest Team
@@ -371,7 +370,7 @@ export function PowerRankings() {
                 <p className="font-display text-lg text-foreground truncate mb-1">
                   {summaryStats.luckiest?.team_name || '—'}
                 </p>
-                <p className="text-2xl font-bold text-primary tabular-nums">
+                <p className="text-2xl font-display text-primary tabular-nums">
                   {summaryStats.luckiest ? formatLuck(summaryStats.luckiest.luck_index) : '—'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">wins above expected</p>
@@ -379,14 +378,13 @@ export function PowerRankings() {
             </Card>
 
             {/* Unluckiest Team */}
-            <Card className="group relative overflow-hidden border-border/30 bg-gradient-to-br from-destructive/10 via-card/80 to-card/50 backdrop-blur hover:border-destructive/50 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <CardContent className="pt-6 relative">
+            <Card className="border-border bg-card hover:border-border/80 transition-colors">
+              <CardContent className="pt-6">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-destructive/20 border border-destructive/30">
+                  <div className="p-2 rounded-lg bg-destructive/10">
                     <Flame className="w-5 h-5 text-destructive" />
                   </div>
-                  <TrendingDown className="w-4 h-4 text-destructive/60" />
+                  <TrendingDown className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Unluckiest Team
@@ -394,7 +392,7 @@ export function PowerRankings() {
                 <p className="font-display text-lg text-foreground truncate mb-1">
                   {summaryStats.unluckiest?.team_name || '—'}
                 </p>
-                <p className="text-2xl font-bold text-destructive tabular-nums">
+                <p className="text-2xl font-display text-destructive tabular-nums">
                   {summaryStats.unluckiest ? formatLuck(summaryStats.unluckiest.luck_index) : '—'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">wins below expected</p>
@@ -402,14 +400,13 @@ export function PowerRankings() {
             </Card>
 
             {/* Most Consistent */}
-            <Card className="group relative overflow-hidden border-border/30 bg-gradient-to-br from-accent/10 via-card/80 to-card/50 backdrop-blur hover:border-accent/50 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <CardContent className="pt-6 relative">
+            <Card className="border-border bg-card hover:border-border/80 transition-colors">
+              <CardContent className="pt-6">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-accent/20 border border-accent/30">
+                  <div className="p-2 rounded-lg bg-accent/10">
                     <Target className="w-5 h-5 text-accent" />
                   </div>
-                  <Activity className="w-4 h-4 text-accent/60" />
+                  <Activity className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Most Consistent
@@ -417,7 +414,7 @@ export function PowerRankings() {
                 <p className="font-display text-lg text-foreground truncate mb-1">
                   {summaryStats.mostConsistent?.team_name || '—'}
                 </p>
-                <p className="text-2xl font-bold text-accent tabular-nums">
+                <p className="text-2xl font-display text-accent tabular-nums">
                   {summaryStats.mostConsistent?.consistency_score.toFixed(1) || '—'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">points std deviation</p>
@@ -425,14 +422,13 @@ export function PowerRankings() {
             </Card>
 
             {/* Toughest Schedule */}
-            <Card className="group relative overflow-hidden border-border/30 bg-gradient-to-br from-blue-500/10 via-card/80 to-card/50 backdrop-blur hover:border-blue-500/50 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <CardContent className="pt-6 relative">
+            <Card className="border-border bg-card hover:border-border/80 transition-colors">
+              <CardContent className="pt-6">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/30">
+                  <div className="p-2 rounded-lg bg-blue-500/10">
                     <Shield className="w-5 h-5 text-blue-400" />
                   </div>
-                  <BarChart3 className="w-4 h-4 text-blue-400/60" />
+                  <BarChart3 className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Toughest Schedule
@@ -440,7 +436,7 @@ export function PowerRankings() {
                 <p className="font-display text-lg text-foreground truncate mb-1">
                   {summaryStats.toughestSchedule?.team_name || '—'}
                 </p>
-                <p className="text-2xl font-bold text-blue-400 tabular-nums">
+                <p className="text-2xl font-display text-blue-400 tabular-nums">
                   {summaryStats.toughestSchedule?.strength_of_schedule.toFixed(1) || '—'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">avg opponent points</p>
@@ -450,7 +446,7 @@ export function PowerRankings() {
 
           {/* Trend Chart */}
           {rankings[0]?.weekly_ranks?.length > 1 && (
-            <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up stagger-2">
+            <Card className="border-border bg-card overflow-hidden animate-fade-up stagger-2">
               <CardHeader className="border-b border-border/30 bg-secondary/20">
                 <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
                   <Activity className="w-5 h-5 text-primary" />
@@ -464,7 +460,7 @@ export function PowerRankings() {
           )}
 
           {/* Power Rankings Table */}
-          <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-3">
+          <Card className="border-border bg-card animate-fade-up stagger-3">
             <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
                 <TrendingUp className="w-5 h-5 text-primary" />
@@ -606,7 +602,7 @@ export function PowerRankings() {
                           </div>
                         </TableCell>
                         <TableCell className="text-center py-4">
-                          <span className="tabular-nums text-muted-foreground">
+                          <span className="font-display tabular-nums text-muted-foreground">
                             {team.expected_wins.toFixed(1)}
                           </span>
                         </TableCell>
@@ -628,24 +624,24 @@ export function PowerRankings() {
                           </div>
                         </TableCell>
                         <TableCell className="text-center py-4">
-                          <span className="tabular-nums">
+                          <span className="font-display tabular-nums">
                             <span className="text-primary">{team.should_be_wins}</span>
                             <span className="text-muted-foreground">-</span>
                             <span className="text-destructive">{team.should_be_losses}</span>
                           </span>
                         </TableCell>
                         <TableCell className="text-center py-4">
-                          <span className="tabular-nums text-muted-foreground">
+                          <span className="font-display tabular-nums text-muted-foreground">
                             {team.consistency_score.toFixed(1)}
                           </span>
                         </TableCell>
                         <TableCell className="text-center py-4">
-                          <span className="tabular-nums text-muted-foreground">
+                          <span className="font-display tabular-nums text-muted-foreground">
                             {team.strength_of_schedule.toFixed(1)}
                           </span>
                         </TableCell>
                         <TableCell className="text-right py-4">
-                          <span className="tabular-nums font-medium">
+                          <span className="font-display tabular-nums">
                             {formatPoints(team.avg_points)}
                           </span>
                         </TableCell>
@@ -658,7 +654,7 @@ export function PowerRankings() {
           </Card>
 
           {/* How Power Rankings Work */}
-          <Card className="border-border/30 bg-card/50 backdrop-blur animate-fade-up stagger-4">
+          <Card className="border-border bg-card animate-fade-up stagger-4">
             <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="text-lg font-display tracking-wide flex items-center gap-3">
                 <Zap className="w-5 h-5 text-accent" />
@@ -780,7 +776,7 @@ export function PowerRankings() {
 
       {/* Empty State */}
       {!loading && !error && rankings.length === 0 && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur">
+        <Card className="border-border bg-card">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="p-4 rounded-full bg-secondary/50">

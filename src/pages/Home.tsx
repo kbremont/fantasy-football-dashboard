@@ -34,9 +34,9 @@ function DraftCard({ draft, index }: { draft: DestinationDraft; index: number })
   const cardContent = (
     <Card
       className={cn(
-        'group border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up',
-        'transition-all duration-500',
-        draft.hasGallery && 'hover:border-primary/50 hover:bg-card/70 cursor-pointer',
+        'group border-border bg-card overflow-hidden animate-fade-up',
+        'transition-all duration-300',
+        draft.hasGallery && 'hover:border-primary/30 cursor-pointer',
         `stagger-${Math.min(index + 3, 10)}`
       )}
     >
@@ -45,11 +45,9 @@ function DraftCard({ draft, index }: { draft: DestinationDraft; index: number })
         {/* Year badge - prominent overlay */}
         <div className="absolute top-0 left-0 z-20">
           <div className="relative">
-            <div className="bg-gradient-to-br from-primary to-primary/80 px-4 py-2 font-display text-2xl text-primary-foreground tracking-wide">
+            <div className="bg-primary px-4 py-2 text-2xl font-semibold text-primary-foreground">
               {draft.year}
             </div>
-            {/* Decorative corner cut */}
-            <div className="absolute -bottom-2 left-0 w-0 h-0 border-l-[16px] border-l-transparent border-t-[8px] border-t-primary/80" />
           </div>
         </div>
 
@@ -162,8 +160,6 @@ export function Home() {
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
 
-            {/* Decorative accent line */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-80" />
           </div>
 
           {/* Hero content */}
@@ -176,18 +172,17 @@ export function Home() {
 
               {/* Main title - dramatic scale */}
               <h1 className="font-display tracking-wide leading-none animate-fade-up stagger-2">
-                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-gradient">
+                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-foreground">
                   GREASY
                 </span>
-                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-foreground -mt-1 md:-mt-2">
+                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-primary -mt-1 md:-mt-2">
                   GOOBLINS
                 </span>
               </h1>
 
-              {/* Subtitle with decorative elements */}
-              <div className="flex items-center gap-3 mt-4 animate-fade-up stagger-3">
-                <div className="w-8 h-px bg-gradient-to-r from-primary to-transparent" />
-                <p className="text-muted-foreground text-sm sm:text-base tracking-widest uppercase">
+              {/* Subtitle */}
+              <div className="mt-4 animate-fade-up stagger-3">
+                <p className="text-muted-foreground text-sm sm:text-base tracking-wider uppercase">
                   Est. 2023 &bull; Destination Draft League
                 </p>
               </div>
@@ -198,22 +193,19 @@ export function Home() {
 
       {/* About Section */}
       <section className="animate-fade-up stagger-2">
-        <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden">
-          {/* Decorative top border */}
-          <div className="h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-
+        <Card className="border-border bg-card overflow-hidden">
           <div className="p-6 sm:p-8 md:p-10">
             <div className="flex flex-col md:flex-row gap-8 md:gap-12">
               {/* Icon column */}
               <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center glow-primary">
+                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Users className="w-8 h-8 text-primary" />
                 </div>
               </div>
 
               {/* Content column */}
               <div className="flex-1 space-y-4">
-                <h2 className="font-display text-2xl sm:text-3xl tracking-wide text-foreground">
+                <h2 className="text-2xl sm:text-3xl font-display tracking-wide text-foreground">
                   ABOUT THE LEAGUE
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
@@ -260,16 +252,16 @@ export function Home() {
         {/* Section header */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
               <Plane className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl tracking-wide text-gradient">
+              <h2 className="text-2xl sm:text-3xl font-display tracking-wide text-foreground">
                 DESTINATION DRAFTS
               </h2>
             </div>
           </div>
-          <div className="flex-1 h-px bg-gradient-to-r from-border/50 to-transparent hidden sm:block" />
+          <div className="flex-1 h-px bg-border/50 hidden sm:block" />
         </div>
 
         {/* Drafts grid */}

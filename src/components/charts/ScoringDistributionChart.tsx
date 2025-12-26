@@ -102,7 +102,7 @@ export function ScoringDistributionChart({ distribution }: ScoringDistributionCh
 
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="hsl(222, 47%, 16%)"
+          stroke="hsl(220, 15%, 18%)"
           strokeOpacity={0.5}
           vertical={false}
         />
@@ -111,8 +111,8 @@ export function ScoringDistributionChart({ distribution }: ScoringDistributionCh
           dataKey="range"
           stroke="hsl(215, 20%, 55%)"
           tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 11 }}
-          axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-          tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+          axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+          tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
           angle={-45}
           textAnchor="end"
           height={60}
@@ -122,8 +122,8 @@ export function ScoringDistributionChart({ distribution }: ScoringDistributionCh
         <YAxis
           stroke="hsl(215, 20%, 55%)"
           tick={{ fill: 'hsl(215, 20%, 55%)', fontSize: 11 }}
-          axisLine={{ stroke: 'hsl(222, 47%, 16%)' }}
-          tickLine={{ stroke: 'hsl(222, 47%, 16%)' }}
+          axisLine={{ stroke: 'hsl(220, 15%, 18%)' }}
+          tickLine={{ stroke: 'hsl(220, 15%, 18%)' }}
           width={40}
           label={{
             value: 'Games',
@@ -135,7 +135,7 @@ export function ScoringDistributionChart({ distribution }: ScoringDistributionCh
           }}
         />
 
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(222, 47%, 14%)', opacity: 0.5 }} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(220, 15%, 15%)', opacity: 0.5 }} />
 
         <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={50}>
           {distribution.map((entry, index) => (

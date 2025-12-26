@@ -204,11 +204,9 @@ export function DraftGallery() {
             <div className="max-w-4xl">
               {/* Year - massive typographic statement */}
               <div className="relative animate-fade-up stagger-2 pointer-events-none">
-                <h1 className="font-display text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[20rem] leading-none tracking-tighter text-gradient -mb-4 md:-mb-8">
+                <h1 className="font-display text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[20rem] leading-none tracking-wide text-foreground -mb-4 md:-mb-8">
                   {yearNum}
                 </h1>
-                {/* Subtle glow behind year */}
-                <div className="absolute inset-0 blur-3xl opacity-20 bg-gradient-to-r from-primary to-accent -z-10" />
               </div>
 
               {/* Location and champion info */}

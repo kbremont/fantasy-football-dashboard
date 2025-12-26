@@ -220,10 +220,10 @@ export function Matchups() {
       {/* Header */}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div>
-          <p className="text-sm font-medium text-primary uppercase tracking-widest mb-2">
+          <p className="text-sm font-medium text-primary uppercase tracking-wider mb-2">
             Weekly Results
           </p>
-          <h1 className="text-5xl md:text-6xl font-display tracking-wide text-gradient">
+          <h1 className="text-4xl md:text-5xl font-display tracking-wide text-foreground">
             MATCHUPS
           </h1>
         </div>
@@ -251,7 +251,7 @@ export function Matchups() {
 
       {/* Week Navigation */}
       <div className="animate-fade-up stagger-1">
-        <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden">
+        <Card className="border-border bg-card overflow-hidden">
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
               {/* Previous Week Button */}
@@ -275,7 +275,7 @@ export function Matchups() {
                       className={cn(
                         'relative px-4 py-2 rounded-lg font-display text-sm tracking-wide transition-all duration-200',
                         selectedWeek === week
-                          ? 'bg-primary text-primary-foreground glow-primary'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                       )}
                     >
@@ -334,7 +334,7 @@ export function Matchups() {
       {loading && (
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="border-border/30 bg-card/50 backdrop-blur animate-pulse">
+            <Card key={i} className="border-border bg-card animate-pulse">
               <CardContent className="p-6">
                 <div className="h-24 bg-secondary/50 rounded-lg" />
               </CardContent>
@@ -350,7 +350,7 @@ export function Matchups() {
             <Card
               key={matchup.matchup_id}
               className={cn(
-                'border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up',
+                'border-border bg-card overflow-hidden animate-fade-up',
                 `stagger-${Math.min(index + 3, 10)}`
               )}
             >
@@ -450,8 +450,6 @@ export function Matchups() {
                     </div>
                   </div>
 
-                  {/* Bottom accent bar */}
-                  <div className="h-1 bg-gradient-to-r from-transparent via-border/50 to-transparent" />
                 </div>
               </CardContent>
             </Card>
@@ -461,7 +459,7 @@ export function Matchups() {
 
       {/* Empty State */}
       {!loading && !error && matchups.length === 0 && (
-        <Card className="border-border/30 bg-card/50 backdrop-blur">
+        <Card className="border-border bg-card">
           <CardContent className="py-16">
             <div className="flex flex-col items-center gap-4 text-center">
               <Swords className="w-12 h-12 text-muted-foreground/50" />
@@ -504,7 +502,7 @@ function GameOfTheWeekCard({ gameOfTheWeek }: GameOfTheWeekCardProps) {
   }
 
   return (
-    <Card className="border-border/30 bg-card/50 backdrop-blur overflow-hidden animate-fade-up stagger-3">
+    <Card className="border-border bg-card overflow-hidden animate-fade-up stagger-3">
       <div className="relative">
         {/* Radial spotlight */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -536,7 +534,7 @@ function GameOfTheWeekCard({ gameOfTheWeek }: GameOfTheWeekCardProps) {
             >
               {isTeam1Winner && (
                 <div className="absolute top-2 left-2 sm:top-4 sm:left-4">
-                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary animate-pulse" />
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
               )}
               <div className="text-center space-y-2 sm:space-y-3">
@@ -547,7 +545,7 @@ function GameOfTheWeekCard({ gameOfTheWeek }: GameOfTheWeekCardProps) {
                   className={cn(
                     'text-2xl sm:text-4xl md:text-5xl font-display tabular-nums transition-all',
                     isTeam1Winner
-                      ? 'text-primary glow-primary-text'
+                      ? 'text-primary'
                       : isTie
                         ? 'text-accent'
                         : 'text-muted-foreground'
@@ -581,7 +579,7 @@ function GameOfTheWeekCard({ gameOfTheWeek }: GameOfTheWeekCardProps) {
             >
               {isTeam2Winner && (
                 <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-accent animate-pulse" />
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
                 </div>
               )}
               <div className="text-center space-y-2 sm:space-y-3">
@@ -592,7 +590,7 @@ function GameOfTheWeekCard({ gameOfTheWeek }: GameOfTheWeekCardProps) {
                   className={cn(
                     'text-2xl sm:text-4xl md:text-5xl font-display tabular-nums transition-all',
                     isTeam2Winner
-                      ? 'text-accent glow-gold-text'
+                      ? 'text-accent'
                       : isTie
                         ? 'text-accent'
                         : 'text-muted-foreground'
