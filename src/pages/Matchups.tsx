@@ -239,15 +239,12 @@ export function Matchups() {
             const matchupDate = getApproximateWeekDate(seasonYear, selectedWeek)
 
             // Get all team history records for these players up to the matchup date
-            // Type assertion needed until types are regenerated after migration
-            const { data: teamHistory } = await (supabase
-              .from('player_team_history' as 'nfl_players')
+            const { data: teamHistory } = await supabase
+              .from('player_team_history')
               .select('player_id, team, effective_date')
               .in('player_id', Array.from(allPlayerIds))
               .lte('effective_date', matchupDate)
-              .order('effective_date', { ascending: false }) as unknown as Promise<{
-                data: { player_id: string; team: string | null; effective_date: string }[] | null
-              }>)
+              .order('effective_date', { ascending: false })
 
             if (teamHistory) {
               // Build a map of player_id -> most recent team (first record for each player due to DESC order)

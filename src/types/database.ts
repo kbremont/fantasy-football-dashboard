@@ -136,6 +136,33 @@ export type Database = {
         }
         Relationships: []
       }
+      player_team_history: {
+        Row: {
+          created_at: string | null
+          effective_date: string
+          id: number
+          player_id: string
+          source: string
+          team: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          effective_date: string
+          id?: number
+          player_id: string
+          source: string
+          team?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          effective_date?: string
+          id?: number
+          player_id?: string
+          source?: string
+          team?: string | null
+        }
+        Relationships: []
+      }
       rosters: {
         Row: {
           created_at: string | null
