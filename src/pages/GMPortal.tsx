@@ -72,6 +72,7 @@ interface TradeDisplay {
   seasonYear: number
   createdAt: number
   grade: TradeGrade
+  tradePartnerName: string
 }
 
 export function GMPortal() {
@@ -464,6 +465,11 @@ export function GMPortal() {
         const tradeDisplays: TradeDisplay[] = []
 
         trades?.forEach((trade) => {
+          // Find trade partner
+          const partnerRosterId = trade.roster_ids?.find((id: number) => id !== rosterIdForQuery)
+          const partnerRoster = rosters.find((r) => r.roster_id === partnerRosterId)
+          const tradePartnerName = partnerRoster?.team_name ?? `Team ${partnerRosterId ?? '?'}`
+
           const transaction: Transaction = {
             transaction_id: trade.transaction_id,
             season_id: trade.season_id,
@@ -492,6 +498,7 @@ export function GMPortal() {
             seasonYear: seasonYearMap.get(trade.season_id) ?? 0,
             createdAt: trade.created_at_sleeper ?? 0,
             grade,
+            tradePartnerName,
           })
         })
 
@@ -900,10 +907,16 @@ function TradeCard({ trade }: TradeCardProps) {
     <div className="p-4">
       {/* Trade Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">
             Week {trade.week}, {trade.seasonYear}
           </span>
+          <span className="text-muted-foreground/50">·</span>
+          <div className="flex items-center gap-1.5">
+            <ArrowRightLeft className="w-3 h-3 text-muted-foreground" />
+            <span className="text-muted-foreground">Traded with</span>
+            <span className="font-display text-accent">{trade.tradePartnerName}</span>
+          </div>
         </div>
         <TradeGradeIcon grade={grade} />
       </div>
