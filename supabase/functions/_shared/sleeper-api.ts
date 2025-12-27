@@ -88,6 +88,28 @@ export async function fetchUsers(leagueId: string): Promise<SleeperUser[]> {
   return response.json();
 }
 
+/**
+ * Fetches all drafts for a league
+ */
+export async function fetchDrafts(leagueId: string): Promise<SleeperDraft[]> {
+  const response = await fetchWithTimeout(`${SLEEPER_BASE_URL}/league/${leagueId}/drafts`);
+  if (!response.ok) {
+    throw new Error(`Sleeper drafts API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetches all picks for a draft
+ */
+export async function fetchDraftPicks(draftId: string): Promise<SleeperDraftPickResult[]> {
+  const response = await fetchWithTimeout(`${SLEEPER_BASE_URL}/draft/${draftId}/picks`);
+  if (!response.ok) {
+    throw new Error(`Sleeper draft picks API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
 // Type definitions for Sleeper API responses
 
 export interface NFLState {
@@ -158,4 +180,26 @@ export interface SleeperUser {
   metadata: {
     team_name?: string;
   } | null;
+}
+
+export interface SleeperDraft {
+  draft_id: string;
+  league_id: string;
+  season: string;
+  type: string;
+  status: string;
+  start_time: number;
+  settings: Record<string, unknown>;
+}
+
+export interface SleeperDraftPickResult {
+  round: number;
+  roster_id: number;
+  player_id: string;
+  picked_by: string;
+  pick_no: number;
+  metadata: Record<string, unknown> | null;
+  is_keeper: boolean | null;
+  draft_slot: number;
+  draft_id: string;
 }
