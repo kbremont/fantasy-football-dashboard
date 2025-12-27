@@ -13,6 +13,7 @@ import {
   getCurrentSeason,
   type Season,
 } from '../_shared/season-utils.ts';
+import { syncPlayoffBrackets } from '../sync-playoff-brackets/index.ts';
 
 interface RequestBody {
   season_year?: number;
@@ -27,6 +28,12 @@ interface WeekResult {
   matchups: number;
   transactions: number;
   player_points: number;
+}
+
+interface SeasonResult {
+  season_year: number;
+  weeks: WeekResult[];
+  playoff_brackets: { winners: number; losers: number };
 }
 
 interface PlayerWeeklyPointsInsert {
@@ -175,15 +182,15 @@ async function syncTransactionsForWeek(
 }
 
 /**
- * Backfills a single season
+ * Backfills a single season (weeks + playoff brackets)
  */
 async function backfillSeason(
   supabase: ReturnType<typeof createServiceClient>,
   season: Season,
   startWeek: number,
   endWeek: number
-): Promise<WeekResult[]> {
-  const results: WeekResult[] = [];
+): Promise<SeasonResult> {
+  const weekResults: WeekResult[] = [];
 
   for (let week = startWeek; week <= endWeek; week++) {
     console.log(`Backfilling week ${week} of season ${season.season_year}...`);
@@ -202,7 +209,7 @@ async function backfillSeason(
       week
     );
 
-    results.push({
+    weekResults.push({
       week,
       matchups: matchupsCount,
       transactions: transactionsCount,
@@ -215,7 +222,22 @@ async function backfillSeason(
     }
   }
 
-  return results;
+  // Sync playoff brackets for this season
+  console.log(`Syncing playoff brackets for season ${season.season_year}...`);
+  let playoffBrackets = { winners: 0, losers: 0 };
+  try {
+    const { winnersCount, losersCount } = await syncPlayoffBrackets(supabase, season);
+    playoffBrackets = { winners: winnersCount, losers: losersCount };
+  } catch (error) {
+    console.error(`Failed to sync playoff brackets for season ${season.season_year}:`, error);
+    // Don't fail the whole backfill if bracket sync fails
+  }
+
+  return {
+    season_year: season.season_year,
+    weeks: weekResults,
+    playoff_brackets: playoffBrackets,
+  };
 }
 
 /**
@@ -306,20 +328,14 @@ Deno.serve(async (req: Request) => {
     }
 
     // Backfill each season
-    const allResults: {
-      season_year: number;
-      weeks: WeekResult[];
-    }[] = [];
+    const allResults: SeasonResult[] = [];
 
     for (const { season, endWeek } of seasonsToBackfill) {
       const startWeek = body.start_week || 1;
       console.log(`Backfilling season ${season.season_year} weeks ${startWeek}-${endWeek}...`);
 
-      const weekResults = await backfillSeason(supabase, season, startWeek, endWeek);
-      allResults.push({
-        season_year: season.season_year,
-        weeks: weekResults,
-      });
+      const seasonResult = await backfillSeason(supabase, season, startWeek, endWeek);
+      allResults.push(seasonResult);
     }
 
     // Return response
