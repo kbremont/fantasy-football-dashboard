@@ -110,6 +110,28 @@ export async function fetchDraftPicks(draftId: string): Promise<SleeperDraftPick
   return response.json();
 }
 
+/**
+ * Fetches the winners bracket (championship) for a league
+ */
+export async function fetchWinnersBracket(leagueId: string): Promise<SleeperPlayoffMatchup[]> {
+  const response = await fetchWithTimeout(`${SLEEPER_BASE_URL}/league/${leagueId}/winners_bracket`);
+  if (!response.ok) {
+    throw new Error(`Sleeper winners bracket API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetches the losers bracket (consolation) for a league
+ */
+export async function fetchLosersBracket(leagueId: string): Promise<SleeperPlayoffMatchup[]> {
+  const response = await fetchWithTimeout(`${SLEEPER_BASE_URL}/league/${leagueId}/losers_bracket`);
+  if (!response.ok) {
+    throw new Error(`Sleeper losers bracket API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
 // Type definitions for Sleeper API responses
 
 export interface NFLState {
@@ -202,4 +224,16 @@ export interface SleeperDraftPickResult {
   is_keeper: boolean | null;
   draft_slot: number;
   draft_id: string;
+}
+
+export interface SleeperPlayoffMatchup {
+  r: number;      // Round number (1, 2, 3...)
+  m: number;      // Match ID (unique within bracket)
+  t1: number | { w: number } | { l: number } | null;  // Team 1 roster_id or advancement reference
+  t2: number | { w: number } | { l: number } | null;  // Team 2 roster_id or advancement reference
+  w: number | null;   // Winner roster_id (null if not played)
+  l: number | null;   // Loser roster_id (null if not played)
+  t1_from?: { w?: number; l?: number };  // Where team 1 came from
+  t2_from?: { w?: number; l?: number };  // Where team 2 came from
+  p?: number;     // Final position (1=champ, 2=runner-up, etc.)
 }
