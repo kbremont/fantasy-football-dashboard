@@ -1,25 +1,33 @@
 # Fantasy Football Dashboard
 
-A full-stack fantasy football analytics application that syncs data from the Sleeper API and displays league standings, matchup history, and more.
+A full-stack fantasy football analytics application that syncs data from the Sleeper API and displays league standings, matchup history, power rankings, rivalry stats, and more.
+
+**Live Site:** [greasygooblins.com](https://greasygooblins.com)
 
 ## Features
 
-- **League Standings** - View team rankings with W-L records, points for/against, and streaks
-- **Matchup History** - Browse weekly head-to-head results with winner highlighting
-- **Multi-Season Support** - Switch between historical seasons
-- **Automated Sync** - Daily player/roster updates, weekly matchup syncs via cron jobs
+- **League Standings** - Team rankings with W-L records, points for/against, and streaks
+- **Matchup History** - Weekly head-to-head results with winner highlighting
+- **Power Rankings** - Advanced analytics with composite scores, expected wins, luck index
+- **League Pulse** - League-wide analytics, records, scoring trends, and playoff race
+- **Rivalry Tracker** - Head-to-head comparisons with momentum charts and revenge games
+- **Fattest Rosters** - Fun roster weight rankings using player data
+- **Draft Gallery** - Photo/video galleries from annual destination drafts
+- **Multi-Season Support** - Browse historical seasons with full data
 
 ## Tech Stack
 
 ### Frontend
 - **Vite + React + TypeScript** - Fast, type-safe development
 - **shadcn/ui + Tailwind CSS** - Modern component library with custom dark theme
+- **Recharts** - Data visualization for analytics pages
 - **React Router** - Client-side routing
 
 ### Backend
 - **Supabase** - PostgreSQL database with Row Level Security
 - **Edge Functions (Deno)** - Serverless data sync functions
 - **pg_cron** - Scheduled jobs for automated updates
+- **Supabase Storage** - Media storage for draft galleries
 
 ### Data Source
 - **Sleeper API** - Fantasy football league data (no auth required)
@@ -69,10 +77,22 @@ The app will be available at `http://localhost:5173`.
 
 ```
 fantasy-dashboard/
-├── src/                    # Frontend source
-│   ├── components/         # React components
-│   ├── pages/              # Page components (Standings, Matchups)
-│   ├── lib/                # Utilities (Supabase client)
+├── src/
+│   ├── components/
+│   │   ├── ui/             # shadcn/ui components
+│   │   ├── charts/         # Recharts visualizations
+│   │   ├── Layout.tsx      # App shell with navigation
+│   │   └── Lightbox.tsx    # Media viewer for galleries
+│   ├── pages/
+│   │   ├── Home.tsx        # Landing page
+│   │   ├── Standings.tsx   # League standings
+│   │   ├── Matchups.tsx    # Weekly matchups
+│   │   ├── PowerRankings.tsx
+│   │   ├── LeaguePulse.tsx
+│   │   ├── Rivals.tsx
+│   │   ├── FattestRosters.tsx
+│   │   └── DraftGallery.tsx
+│   ├── lib/                # Utilities and analytics
 │   └── types/              # TypeScript types
 ├── supabase/
 │   ├── functions/          # Edge Functions (Deno)
@@ -84,12 +104,26 @@ fantasy-dashboard/
 
 | Table | Description |
 |-------|-------------|
-| `nfl_players` | NFL player roster data |
+| `nfl_players` | NFL player roster data (name, position, team, weight) |
 | `rosters` | Fantasy team metadata |
-| `seasons` | Multi-season tracking |
-| `matchups` | Weekly matchup results |
+| `seasons` | Multi-season tracking with Sleeper league IDs |
+| `matchups` | Weekly matchup results with starters and points |
 | `weekly_rosters` | Weekly roster snapshots |
-| `transactions` | Trades, waivers, pickups |
+| `transactions` | Trades, waivers, free agent pickups |
+| `drafts` | Draft metadata per season |
+| `draft_picks` | Individual draft picks with keeper tracking |
+| `player_weekly_points` | Player scoring by week |
+
+## Edge Functions
+
+| Function | Description |
+|----------|-------------|
+| `sync-nfl-players` | Syncs all NFL players from Sleeper |
+| `sync-league-rosters` | Syncs fantasy team rosters |
+| `sync-weekly-matchups` | Syncs matchup results for a week |
+| `sync-weekly-transactions` | Syncs transactions for a week |
+| `sync-drafts` | Syncs draft picks with keeper detection |
+| `backfill-season` | Orchestrates full season data backfill |
 
 ## Scheduled Jobs
 
@@ -98,9 +132,13 @@ fantasy-dashboard/
 
 ## Deployment
 
-The project uses GitHub Actions for CI/CD:
+**Frontend:** Deployed to [Vercel](https://vercel.com) with automatic deployments on push to `main`.
+
+**Backend:** GitHub Actions CI/CD for Supabase:
 - Database migrations auto-deploy on changes to `supabase/migrations/`
 - Edge functions auto-deploy on changes to `supabase/functions/`
+
+**Important:** Always apply database migrations through the CI/CD pipeline by pushing to `main`. Do not run `supabase db push` manually against production.
 
 ## License
 

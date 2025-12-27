@@ -7,16 +7,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Fantasy Football Dashboard is a data pipeline and analytics application that syncs NFL player data and fantasy league rosters from the Sleeper API to a Supabase PostgreSQL database. The project uses Supabase Edge Functions (Deno runtime) for serverless data synchronization and scheduled cron jobs for automated updates.
 
 **Key Technologies:**
-- Supabase (PostgreSQL database, Edge Functions, pg_cron)
+- Supabase (PostgreSQL database, Edge Functions, pg_cron, Storage)
 - TypeScript/Deno (Edge Functions runtime)
 - Sleeper API (fantasy football data source)
 - GitHub Actions (CI/CD)
 - Vite + React + TypeScript (Frontend)
 - shadcn/ui + Tailwind CSS (UI Components)
+- Recharts (Data visualization)
 
 **Project ID:** fnphwakozzgoqpoidpvq
 **Supabase URL:** https://fnphwakozzgoqpoidpvq.supabase.co
 **Sleeper League ID:** 1180722152528445440
+
+**League Details:**
+- 6-keeper dynasty league (keepers retained in rounds 1-6)
+- Annual "Destination Draft" tradition with changing locations
+- 2023 was the inaugural season (no keepers)
 
 ## Database Architecture
 
@@ -44,9 +50,9 @@ Fantasy Football Dashboard is a data pipeline and analytics application that syn
 
 **`matchups`** - Weekly matchup results
 - Primary key: `id` (BIGSERIAL)
-- Includes: season_id, week, matchup_id, roster_id, starters[], players[], points
+- Includes: season_id, week, matchup_id, roster_id, starters[], points
 - Two rosters with same matchup_id played against each other
-- GIN indexes on starters and players arrays for player lookups
+- GIN indexes on starters array for player lookups
 - Unique constraint: (season_id, week, roster_id)
 
 **`weekly_rosters`** - Weekly roster snapshots
@@ -61,6 +67,31 @@ Fantasy Football Dashboard is a data pipeline and analytics application that syn
 - Types: trade, free_agent, waiver, commissioner
 - JSONB columns for adds/drops (player_id -> roster_id mapping)
 - Unique constraint on transaction_id
+
+**`drafts`** - Draft metadata for each season
+- Primary key: `id` (BIGSERIAL)
+- Includes: draft_id, season_id, league_id, type, status, start_time
+- Unique constraint on draft_id
+- References seasons table
+
+**`draft_picks`** - Individual draft picks
+- Primary key: `id` (BIGSERIAL)
+- Includes: draft_id, round, pick_no, roster_id, player_id, is_keeper, metadata
+- is_keeper: TRUE for rounds 1-6 (keeper league with 6 keepers)
+- 2023 season keepers marked as FALSE (inaugural season)
+- Indexes on roster_id, player_id, and is_keeper
+- Unique constraint: (draft_id, round, pick_no)
+
+**`player_weekly_points`** - Player scoring by week (for analytics)
+- Includes: season_id, week, roster_id, player_id, points
+- Used for individual player performance tracking
+
+### Storage Buckets
+
+**`draft-media`** - Public bucket for draft photos/videos
+- Structure: `drafts/{year}/cover.jpg` for cover images
+- Structure: `drafts/{year}/{filename}` for gallery media
+- Also contains: `league/hero.jpg` for home page hero image
 
 ### Scheduled Jobs
 
@@ -78,18 +109,18 @@ Jobs invoke edge functions via wrapper functions (e.g., `invoke_sync_nfl_players
 
 ### Database Migrations
 
+**IMPORTANT:** Migrations should be applied through the GitHub Actions CI/CD workflow, not manually. Push migration files to the `main` branch and the workflow will automatically apply them.
+
 ```bash
-# Apply migrations to remote database
-supabase db push
-
-# Create a new migration
+# Create a new migration (local development)
 supabase migration new <migration_name>
-
-# Reset local database (destructive)
-supabase db reset
 
 # View migration status
 supabase migration list
+
+# For local development only:
+supabase db push        # Apply migrations locally
+supabase db reset       # Reset local database (destructive)
 ```
 
 ### Edge Functions
@@ -101,6 +132,7 @@ supabase functions deploy
 # Deploy a specific function
 supabase functions deploy sync-nfl-players
 supabase functions deploy sync-league-rosters
+supabase functions deploy sync-drafts
 
 # Test locally
 supabase functions serve
@@ -149,24 +181,47 @@ npm run preview
 ```
 src/
 ├── components/
-│   ├── ui/              # shadcn/ui components (Table, Card, Select, Button, Tabs)
-│   └── Layout.tsx       # App shell with navigation header
+│   ├── ui/                 # shadcn/ui components (Table, Card, Select, Button, Tabs)
+│   ├── charts/             # Recharts-based chart components
+│   │   ├── RankingTrendChart.tsx
+│   │   ├── RivalryMomentumChart.tsx
+│   │   ├── ScoringDistributionChart.tsx
+│   │   └── WeeklyTrendChart.tsx
+│   ├── Layout.tsx          # App shell with navigation header/footer
+│   ├── Lightbox.tsx        # Full-featured media viewer for galleries
+│   └── ScrollToTop.tsx     # Scrolls to top on route change
 ├── pages/
-│   ├── Standings.tsx    # League standings with W-L records
-│   └── Matchups.tsx     # Weekly matchup results
+│   ├── Home.tsx            # Landing page with league overview
+│   ├── Standings.tsx       # League standings with W-L records
+│   ├── Matchups.tsx        # Weekly matchup results
+│   ├── PowerRankings.tsx   # Advanced analytics and power scores
+│   ├── LeaguePulse.tsx     # League-wide analytics dashboard
+│   ├── Rivals.tsx          # Head-to-head rivalry tracker
+│   ├── FattestRosters.tsx  # Roster weight rankings
+│   └── DraftGallery.tsx    # Destination draft photo/video gallery
 ├── lib/
-│   ├── supabase.ts      # Supabase client (uses publishable key)
-│   └── utils.ts         # shadcn/ui utility (cn function)
+│   ├── supabase.ts         # Supabase client (uses publishable key)
+│   ├── utils.ts            # shadcn/ui utility (cn function)
+│   ├── power-rankings.ts   # Power ranking calculations
+│   ├── league-pulse.ts     # League analytics calculations
+│   ├── rivalry-stats.ts    # Head-to-head rivalry analytics
+│   └── storage.ts          # Supabase Storage utilities
 ├── types/
-│   └── database.ts      # Auto-generated Supabase types
-├── App.tsx              # React Router setup
-├── main.tsx             # Entry point
-└── index.css            # Tailwind + custom theme
+│   └── database.ts         # Auto-generated Supabase types
+├── App.tsx                 # React Router setup
+├── main.tsx                # Entry point
+└── index.css               # Tailwind + custom theme
 ```
 
 ### Pages
 
-**Standings (`/`)**
+**Home (`/`)**
+- Landing page with league hero image
+- Destination draft gallery cards (2023, 2024, 2025)
+- "About the League" section
+- Links to all major features
+
+**Standings (`/standings`)**
 - Displays league standings with W-L-T records
 - Season selector dropdown
 - Calculates wins/losses from matchups table
@@ -181,6 +236,51 @@ src/
 - Scoreboard-style cards with VS divider
 - Winner highlighted with crown icon
 
+**Power Rankings (`/power-rankings`)**
+- Composite power score formula:
+  - 35% actual win percentage
+  - 30% average points per week
+  - 20% expected wins (vs all opponents each week)
+  - 15% consistency score (inverse of std deviation)
+- Expected wins, luck index, vs median record
+- Strength of schedule calculation
+- Ranking trend chart showing week-by-week changes
+- Sortable table with all metrics
+- Educational section explaining methodology
+
+**League Pulse (`/league-pulse`)**
+- Season overview stats (high score, avg margin, parity index, close games %)
+- League records (highest/lowest scores, biggest blowouts, longest streaks)
+- Scoring distribution chart
+- Weekly trend charts (high/low/average per week)
+- Playoff race tracker (current season only)
+- Season filter
+
+**Rivals (`/rivals`)**
+- Team selector dropdowns for head-to-head comparison
+- Season filter (All-Time or specific season)
+- VS hero section with win counts
+- Tale of the tape comparison bars
+- Battle momentum chart (point progression over matchup history)
+- Biggest blowouts (each team's best win)
+- Closest games (nail-biters within 5 points)
+- Revenge games timeline
+
+**Fattest Rosters (`/fattest-rosters`)**
+- Fetches current rosters from Sleeper API
+- Pulls player weights from nfl_players table
+- Displays total roster weight with heavyweight champion card
+- Shows heaviest player per roster
+- Weight bar visualization
+
+**Draft Gallery (`/draft/:year`)**
+- Cinematic hero section with year typography
+- Location and champion badges
+- Gallery grid (featured item spans 2 columns)
+- Video playback support with play indicators
+- Lightbox integration for fullscreen viewing
+- Keyboard navigation (arrows, escape, space for play/pause)
+
 ### Environment Variables
 
 Create `.env` in project root:
@@ -194,10 +294,11 @@ The publishable key (not anon key) is used for client-side access. Get it from S
 
 ### Design System
 
-- **Theme**: Dark sports-editorial with navy background
-- **Fonts**: Bebas Neue (display), DM Sans (body)
+- **Theme**: Dark sports-editorial with navy background (`hsl(215 30% 8%)`)
+- **Fonts**: Bebas Neue (display headings), DM Sans (body text)
 - **Colors**: Primary green (wins), Destructive red (losses), Gold accent
 - **Effects**: Gradient backgrounds, glow effects, fade-up animations
+- **Animations**: Staggered fade-up animations defined in index.css
 
 ## Edge Functions Architecture
 
@@ -246,6 +347,14 @@ Common utilities used across all edge functions:
 - Parameters: `{ season_year?, sleeper_league_id?, start_week?, end_week?, discover_previous? }`
 - With `discover_previous: true`, follows `previous_league_id` chain to find and backfill all historical seasons
 
+**sync-drafts** (`supabase/functions/sync-drafts/`)
+- Syncs draft data from Sleeper API
+- Fetches drafts for each season in database
+- Syncs draft picks with keeper detection (rounds 1-6 marked as keepers)
+- 2023 season picks marked as non-keepers (inaugural season)
+- Parameters: `{ season_year? }` for specific season or syncs all
+- Returns count of drafts and picks synced
+
 ## CI/CD Workflows
 
 GitHub Actions automatically deploy on push to `main`:
@@ -253,6 +362,7 @@ GitHub Actions automatically deploy on push to `main`:
 **`.github/workflows/deploy-migrations.yml`**
 - Triggers on changes to `supabase/migrations/**`
 - Runs `supabase db push` to apply migrations
+- **This is the preferred method for applying migrations to production**
 
 **`.github/workflows/deploy-edge-functions.yml`**
 - Triggers on changes to `supabase/functions/**`
@@ -264,6 +374,17 @@ GitHub Actions automatically deploy on push to `main`:
 - Preview migration changes before deploying
 
 **Required Secret:** `SUPABASE_ACCESS_TOKEN` must be set in GitHub repository secrets
+
+## Migration Workflow
+
+**IMPORTANT:** Always apply migrations through the CI/CD pipeline:
+
+1. Create a new migration file: `supabase migration new <migration_name>`
+2. Write your SQL in the generated file
+3. Commit and push to `main` branch
+4. GitHub Actions will automatically apply the migration
+
+Do NOT run `supabase db push` manually against production. The CI/CD workflow ensures consistent, tracked deployments.
 
 ## Migration Naming Convention
 
@@ -280,6 +401,11 @@ Key migrations:
 - `20251225005813_create_matchups_table.sql` - Matchup results tracking
 - `20251225005814_create_transactions_table.sql` - Transaction history
 - `20251225005815_schedule_weekly_sync.sql` - Weekly matchup/transaction cron jobs
+- `20251226000000_create_draft_tables.sql` - Drafts and draft_picks tables
+- `20251226215319_create_player_weekly_points.sql` - Player weekly points tracking
+- `20251226221508_enable_pg_net.sql` - Enable pg_net extension
+- `20251226222219_use_vault_for_cron_auth.sql` - Vault for cron authentication
+- `20251227204647_fix_2023_keeper_status.sql` - Mark 2023 picks as non-keepers
 
 ## Working with Sleeper API
 
@@ -320,12 +446,22 @@ GET https://api.sleeper.app/v1/league/{league_id}/matchups/{week}
 GET https://api.sleeper.app/v1/league/{league_id}/transactions/{week}
 ```
 
+**Drafts for a League:**
+```
+GET https://api.sleeper.app/v1/league/{league_id}/drafts
+```
+
+**Draft Picks:**
+```
+GET https://api.sleeper.app/v1/draft/{draft_id}/picks
+```
+
 **Note:** Sleeper uses the season start year for naming. The 2025-26 NFL season (starting Sep 2025) is labeled "2025" in Sleeper.
 
 ## Row Level Security (RLS)
 
 All tables have RLS enabled with the following policies:
-- **SELECT**: Authenticated users and service role
+- **SELECT**: Authenticated users and service role (some tables allow public read)
 - **INSERT/UPDATE**: Authenticated users and service role
 - **DELETE**: Service role only
 
@@ -408,4 +544,14 @@ JOIN rosters r ON wr.roster_id = r.roster_id
 JOIN seasons s ON wr.season_id = s.id
 WHERE '4034' = ANY(wr.player_ids) AND s.season_year = 2025
 ORDER BY wr.week;
+
+-- Get all keepers for a season
+SELECT dp.round, dp.pick_no, np.full_name, r.team_name
+FROM draft_picks dp
+JOIN drafts d ON dp.draft_id = d.draft_id
+JOIN seasons s ON d.season_id = s.id
+JOIN nfl_players np ON dp.player_id = np.player_id
+JOIN rosters r ON dp.roster_id = r.roster_id
+WHERE s.season_year = 2025 AND dp.is_keeper = true
+ORDER BY dp.round, dp.pick_no;
 ```
