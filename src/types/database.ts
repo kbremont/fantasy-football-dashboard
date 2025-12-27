@@ -47,6 +47,94 @@ export type Database = {
         }
         Relationships: []
       }
+      draft_picks: {
+        Row: {
+          created_at: string | null
+          draft_id: string
+          id: number
+          is_keeper: boolean | null
+          metadata: Json | null
+          pick_no: number
+          player_id: string
+          roster_id: number
+          round: number
+        }
+        Insert: {
+          created_at?: string | null
+          draft_id: string
+          id?: number
+          is_keeper?: boolean | null
+          metadata?: Json | null
+          pick_no: number
+          player_id: string
+          roster_id: number
+          round: number
+        }
+        Update: {
+          created_at?: string | null
+          draft_id?: string
+          id?: number
+          is_keeper?: boolean | null
+          metadata?: Json | null
+          pick_no?: number
+          player_id?: string
+          roster_id?: number
+          round?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draft_picks_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["draft_id"]
+          },
+        ]
+      }
+      drafts: {
+        Row: {
+          created_at: string | null
+          draft_id: string
+          id: number
+          league_id: string
+          season_id: number
+          start_time: number | null
+          status: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          draft_id: string
+          id?: number
+          league_id: string
+          season_id: number
+          start_time?: number | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          draft_id?: string
+          id?: number
+          league_id?: string
+          season_id?: number
+          start_time?: number | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drafts_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matchups: {
         Row: {
           created_at: string | null
