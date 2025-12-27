@@ -375,6 +375,9 @@ export function GMPortal() {
         const allPlayerIds = [...new Set([...keeperPlayerIds, ...tradePlayerIds])]
 
         // Fetch player names and positions
+        const names = new Map<string, string>()
+        const positions = new Map<string, string | null>()
+
         if (allPlayerIds.length > 0) {
           const { data: players, error: playersError } = await supabase
             .from('nfl_players')
@@ -383,8 +386,6 @@ export function GMPortal() {
 
           if (playersError) throw playersError
 
-          const names = new Map<string, string>()
-          const positions = new Map<string, string | null>()
           players?.forEach((p) => {
             names.set(p.player_id, p.full_name)
             positions.set(p.player_id, p.position)
@@ -487,7 +488,7 @@ export function GMPortal() {
             transaction,
             rosterIdForQuery,
             playerWeeklyPoints,
-            playerNames,
+            names,
             currentWeek,
             currentSeasonId
           )
