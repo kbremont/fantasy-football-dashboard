@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import {
   fetchPlayerSeasonStats,
+  fetchTeamRoster,
   getCurrentCFBSeason,
   type CFBDPlayerSeasonStat,
 } from '../_shared/cfbd-api.ts';
@@ -102,6 +103,90 @@ async function syncSeason(
 }
 
 /**
+ * Populates position data for a season by fetching roster data
+ */
+async function populatePositions(
+  supabase: ReturnType<typeof createClient>,
+  year: number
+): Promise<{ positionsUpdated: number; errors: string[] }> {
+  console.log(`Populating positions for ${year} season...`);
+  const errors: string[] = [];
+
+  // 1. Get unique teams from stats for this season
+  const { data: teamData, error: teamError } = await supabase
+    .from('cfb_player_season_stats')
+    .select('team')
+    .eq('season', year)
+    .not('team', 'is', null);
+
+  if (teamError) {
+    errors.push(`Failed to fetch teams: ${teamError.message}`);
+    return { positionsUpdated: 0, errors };
+  }
+
+  const uniqueTeams = [...new Set(teamData?.map((t) => t.team).filter(Boolean) || [])];
+  console.log(`Found ${uniqueTeams.length} unique teams for ${year}`);
+
+  // 2. Fetch roster for each team and build position map
+  const positionMap = new Map<string, string>(); // playerId -> position
+  let teamsProcessed = 0;
+
+  for (const team of uniqueTeams) {
+    try {
+      const roster = await fetchTeamRoster(year, team);
+      for (const player of roster) {
+        if (player.athlete_id && player.position) {
+          positionMap.set(String(player.athlete_id), player.position);
+        }
+      }
+      teamsProcessed++;
+
+      // Rate limiting: small delay between requests
+      if (teamsProcessed % 10 === 0) {
+        console.log(`Processed ${teamsProcessed}/${uniqueTeams.length} teams`);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    } catch (err) {
+      // Some teams may not have roster data, log but continue
+      console.warn(`Failed to fetch roster for ${team}: ${err}`);
+    }
+  }
+
+  console.log(`Built position map with ${positionMap.size} players`);
+
+  // 3. Update positions in database (one update per player covers all their stat rows)
+  let positionsUpdated = 0;
+  const playerIds = Array.from(positionMap.keys());
+  const batches = batchArray(playerIds, 50);
+
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+
+    for (const playerId of batch) {
+      const position = positionMap.get(playerId);
+      if (!position) continue;
+
+      const { error } = await supabase
+        .from('cfb_player_season_stats')
+        .update({ position })
+        .eq('cfbd_player_id', playerId)
+        .eq('season', year);
+
+      if (!error) {
+        positionsUpdated++;
+      }
+    }
+
+    if ((i + 1) % 10 === 0) {
+      console.log(`Updated positions batch ${i + 1}/${batches.length}`);
+    }
+  }
+
+  console.log(`Updated positions for ${positionsUpdated} players`);
+  return { positionsUpdated, errors };
+}
+
+/**
  * Main edge function handler
  * Syncs college football player season stats from CFBD API
  */
@@ -149,16 +234,24 @@ Deno.serve(async (req: Request) => {
       console.log(`Default mode: syncing current season (${currentSeason})`);
     }
 
-    // 4. Sync each year
+    // 4. Sync each year (stats + positions)
     let totalProcessed = 0;
+    let totalPositionsUpdated = 0;
     const allErrors: string[] = [];
-    const yearResults: Record<number, number> = {};
+    const yearResults: Record<number, { stats: number; positions: number }> = {};
 
     for (const year of yearsToSync) {
+      // Sync stats
       const { count, errors } = await syncSeason(supabase, year);
       totalProcessed += count;
-      yearResults[year] = count;
       allErrors.push(...errors);
+
+      // Populate positions from roster data
+      const { positionsUpdated, errors: posErrors } = await populatePositions(supabase, year);
+      totalPositionsUpdated += positionsUpdated;
+      allErrors.push(...posErrors);
+
+      yearResults[year] = { stats: count, positions: positionsUpdated };
 
       // Add delay between years to avoid rate limiting
       if (yearsToSync.length > 1 && year !== yearsToSync[yearsToSync.length - 1]) {
@@ -171,6 +264,7 @@ Deno.serve(async (req: Request) => {
     const response = {
       success: allErrors.length === 0,
       statsProcessed: totalProcessed,
+      positionsUpdated: totalPositionsUpdated,
       yearResults,
       seasonsProcessed: yearsToSync.length,
       errors: allErrors.length > 0 ? allErrors : undefined,

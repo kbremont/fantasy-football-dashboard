@@ -69,6 +69,15 @@ export interface CFBDPlayerSeasonStat {
   stat: number | string;
 }
 
+export interface CFBDRosterPlayer {
+  athlete_id: string;
+  first_name: string;
+  last_name: string;
+  position: string;
+  team: string;
+  year: number;
+}
+
 /**
  * Fetch player season statistics
  * @param year - Season year (required)
@@ -110,4 +119,19 @@ export function getCurrentCFBSeason(): number {
     return year - 1;
   }
   return year;
+}
+
+/**
+ * Fetch team roster with player positions
+ * @param year - Season year (required)
+ * @param team - Team name (required)
+ */
+export async function fetchTeamRoster(
+  year: number,
+  team: string
+): Promise<CFBDRosterPlayer[]> {
+  return fetchFromCFBD<CFBDRosterPlayer[]>('/roster', {
+    year,
+    team,
+  });
 }
