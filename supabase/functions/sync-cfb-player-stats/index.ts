@@ -62,15 +62,18 @@ function transformStats(stats: CFBDPlayerSeasonStat[]): CFBPlayerStatsInsert[] {
 async function syncSeason(
   supabase: ReturnType<typeof createClient>,
   year: number
-): Promise<{ count: number; errors: string[] }> {
+): Promise<{ count: number; errors: string[]; teams: string[] }> {
   console.log(`Fetching stats for ${year} season...`);
 
   const stats = await fetchPlayerSeasonStats(year);
   console.log(`Fetched ${stats.length} stat records for ${year}`);
 
   if (stats.length === 0) {
-    return { count: 0, errors: [] };
+    return { count: 0, errors: [], teams: [] };
   }
+
+  // Extract unique teams from stats data
+  const teams = [...new Set(stats.map((s) => s.team).filter(Boolean))];
 
   const inserts = transformStats(stats);
   console.log(`Transformed ${inserts.length} records for upsert`);
@@ -99,7 +102,7 @@ async function syncSeason(
     }
   }
 
-  return { count: totalUpserted, errors };
+  return { count: totalUpserted, errors, teams };
 }
 
 /**
@@ -107,31 +110,21 @@ async function syncSeason(
  */
 async function populatePositions(
   supabase: ReturnType<typeof createClient>,
-  year: number
+  year: number,
+  teams: string[]
 ): Promise<{ positionsUpdated: number; errors: string[] }> {
-  console.log(`Populating positions for ${year} season...`);
+  console.log(`Populating positions for ${year} season (${teams.length} teams)...`);
   const errors: string[] = [];
 
-  // 1. Get unique teams from stats for this season
-  const { data: teamData, error: teamError } = await supabase
-    .from('cfb_player_season_stats')
-    .select('team')
-    .eq('season', year)
-    .not('team', 'is', null);
-
-  if (teamError) {
-    errors.push(`Failed to fetch teams: ${teamError.message}`);
+  if (teams.length === 0) {
     return { positionsUpdated: 0, errors };
   }
 
-  const uniqueTeams = [...new Set(teamData?.map((t) => t.team).filter(Boolean) || [])];
-  console.log(`Found ${uniqueTeams.length} unique teams for ${year}`);
-
-  // 2. Fetch roster for each team and build position map
+  // Fetch roster for each team and build position map
   const positionMap = new Map<string, string>(); // playerId -> position
   let teamsProcessed = 0;
 
-  for (const team of uniqueTeams) {
+  for (const team of teams) {
     try {
       const roster = await fetchTeamRoster(year, team);
       for (const player of roster) {
@@ -143,7 +136,7 @@ async function populatePositions(
 
       // Rate limiting: small delay between requests
       if (teamsProcessed % 10 === 0) {
-        console.log(`Processed ${teamsProcessed}/${uniqueTeams.length} teams`);
+        console.log(`Processed ${teamsProcessed}/${teams.length} teams`);
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     } catch (err) {
@@ -242,12 +235,12 @@ Deno.serve(async (req: Request) => {
 
     for (const year of yearsToSync) {
       // Sync stats
-      const { count, errors } = await syncSeason(supabase, year);
+      const { count, errors, teams } = await syncSeason(supabase, year);
       totalProcessed += count;
       allErrors.push(...errors);
 
       // Populate positions from roster data
-      const { positionsUpdated, errors: posErrors } = await populatePositions(supabase, year);
+      const { positionsUpdated, errors: posErrors } = await populatePositions(supabase, year, teams);
       totalPositionsUpdated += positionsUpdated;
       allErrors.push(...posErrors);
 
