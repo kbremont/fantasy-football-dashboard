@@ -9,6 +9,7 @@ import { Rivals } from '@/pages/Rivals'
 import { LeaguePulse } from '@/pages/LeaguePulse'
 import { DraftGallery } from '@/pages/DraftGallery'
 import { FattestRosters } from '@/pages/FattestRosters'
+import { CollegeScouting } from '@/pages/CollegeScouting'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/rivals" element={<Rivals />} />
           <Route path="/league-pulse" element={<LeaguePulse />} />
           <Route path="/fattest-rosters" element={<FattestRosters />} />
+          <Route path="/scouting" element={<CollegeScouting />} />
           <Route path="/draft/:year" element={<DraftGallery />} />
         </Route>
       </Routes>

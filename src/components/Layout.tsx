@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { Home, Trophy, Calendar, TrendingUp, Swords, Activity, Scale, Menu, X } from 'lucide-react'
+import { Home, Trophy, Calendar, TrendingUp, Swords, Activity, Scale, Menu, X, GraduationCap } from 'lucide-react'
 
 const navItems = [
   { path: '/', label: 'Home', icon: Home },
@@ -11,6 +11,7 @@ const navItems = [
   { path: '/rivals', label: 'Rivals', icon: Swords },
   { path: '/power-rankings', label: 'Power Rankings', icon: TrendingUp },
   { path: '/fattest-rosters', label: 'Heavyweights', icon: Scale },
+  { path: '/scouting', label: 'Scouting', icon: GraduationCap },
 ]
 
 export function Layout() {

@@ -14,38 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      draft_media: {
+      cfb_player_season_stats: {
         Row: {
-          caption: string | null
+          category: string
+          cfbd_player_id: string
+          conference: string | null
           created_at: string | null
-          display_order: number | null
           id: number
-          media_type: string | null
-          storage_path: string
+          player_name: string
+          position: string | null
+          season: number
+          stat_type: string
+          stat_value: number | null
+          team: string | null
           updated_at: string | null
-          year: number
         }
         Insert: {
-          caption?: string | null
+          category: string
+          cfbd_player_id: string
+          conference?: string | null
           created_at?: string | null
-          display_order?: number | null
           id?: number
-          media_type?: string | null
-          storage_path: string
+          player_name: string
+          position?: string | null
+          season: number
+          stat_type: string
+          stat_value?: number | null
+          team?: string | null
           updated_at?: string | null
-          year: number
         }
         Update: {
-          caption?: string | null
+          category?: string
+          cfbd_player_id?: string
+          conference?: string | null
           created_at?: string | null
-          display_order?: number | null
           id?: number
-          media_type?: string | null
-          storage_path?: string
+          player_name?: string
+          position?: string | null
+          season?: number
+          stat_type?: string
+          stat_value?: number | null
+          team?: string | null
           updated_at?: string | null
-          year?: number
         }
         Relationships: []
+      }
+      draft_picks: {
+        Row: {
+          created_at: string | null
+          draft_id: string
+          id: number
+          is_keeper: boolean | null
+          metadata: Json | null
+          pick_no: number
+          player_id: string
+          roster_id: number
+          round: number
+        }
+        Insert: {
+          created_at?: string | null
+          draft_id: string
+          id?: number
+          is_keeper?: boolean | null
+          metadata?: Json | null
+          pick_no: number
+          player_id: string
+          roster_id: number
+          round: number
+        }
+        Update: {
+          created_at?: string | null
+          draft_id?: string
+          id?: number
+          is_keeper?: boolean | null
+          metadata?: Json | null
+          pick_no?: number
+          player_id?: string
+          roster_id?: number
+          round?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draft_picks_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["draft_id"]
+          },
+        ]
+      }
+      drafts: {
+        Row: {
+          created_at: string | null
+          draft_id: string
+          id: number
+          league_id: string
+          season_id: number
+          start_time: number | null
+          status: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          draft_id: string
+          id?: number
+          league_id: string
+          season_id: number
+          start_time?: number | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          draft_id?: string
+          id?: number
+          league_id?: string
+          season_id?: number
+          start_time?: number | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drafts_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       matchups: {
         Row: {
@@ -194,6 +294,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "player_weekly_points_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playoff_brackets: {
+        Row: {
+          bracket_type: string
+          created_at: string | null
+          final_position: number | null
+          id: number
+          loser_roster_id: number | null
+          match_id: number
+          playoff_week: number | null
+          roster_id_1: number | null
+          roster_id_2: number | null
+          round: number
+          season_id: number
+          t1_from: Json | null
+          t2_from: Json | null
+          updated_at: string | null
+          winner_roster_id: number | null
+        }
+        Insert: {
+          bracket_type: string
+          created_at?: string | null
+          final_position?: number | null
+          id?: number
+          loser_roster_id?: number | null
+          match_id: number
+          playoff_week?: number | null
+          roster_id_1?: number | null
+          roster_id_2?: number | null
+          round: number
+          season_id: number
+          t1_from?: Json | null
+          t2_from?: Json | null
+          updated_at?: string | null
+          winner_roster_id?: number | null
+        }
+        Update: {
+          bracket_type?: string
+          created_at?: string | null
+          final_position?: number | null
+          id?: number
+          loser_roster_id?: number | null
+          match_id?: number
+          playoff_week?: number | null
+          roster_id_1?: number | null
+          roster_id_2?: number | null
+          round?: number
+          season_id?: number
+          t1_from?: Json | null
+          t2_from?: Json | null
+          updated_at?: string | null
+          winner_roster_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playoff_brackets_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "seasons"
@@ -357,6 +519,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      invoke_sync_cfb_player_stats: { Args: never; Returns: undefined }
       invoke_sync_league_rosters: { Args: never; Returns: undefined }
       invoke_sync_nfl_players: { Args: never; Returns: undefined }
       invoke_sync_weekly_matchups: { Args: never; Returns: undefined }
