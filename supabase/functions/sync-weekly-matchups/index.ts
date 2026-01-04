@@ -10,7 +10,6 @@ import {
   getSeasonById,
   type Season,
 } from '../_shared/season-utils.ts';
-import { syncPlayoffBrackets } from '../_shared/playoff-brackets.ts';
 
 interface RequestBody {
   week?: number;
@@ -200,7 +199,7 @@ Deno.serve(async (req: Request) => {
       season = await getCurrentSeason(supabase);
     }
 
-    // Get NFL state for week default and playoff detection
+    // Get NFL state for default week calculation
     const nflState = await fetchNFLState();
 
     // Get week
@@ -213,7 +212,6 @@ Deno.serve(async (req: Request) => {
     let totalMatchups = 0;
     let totalRosters = 0;
     let totalPlayerPoints = 0;
-    let playoffBracketsSynced = false;
     const weeksProcessed: number[] = [];
 
     if (body.backfill) {
@@ -239,18 +237,6 @@ Deno.serve(async (req: Request) => {
       weeksProcessed.push(targetWeek);
     }
 
-    // Sync playoff brackets during postseason
-    if (nflState.season_type === 'post') {
-      console.log('Postseason detected, syncing playoff brackets...');
-      try {
-        await syncPlayoffBrackets(supabase, season);
-        playoffBracketsSynced = true;
-      } catch (bracketError) {
-        console.error('Failed to sync playoff brackets:', bracketError);
-        // Don't fail the whole sync if bracket sync fails
-      }
-    }
-
     // Return response
     const duration = Date.now() - startTime;
     const response = {
@@ -260,7 +246,6 @@ Deno.serve(async (req: Request) => {
       matchups_synced: totalMatchups,
       rosters_synced: totalRosters,
       player_points_synced: totalPlayerPoints,
-      playoff_brackets_synced: playoffBracketsSynced,
       duration_ms: duration,
       timestamp: new Date().toISOString(),
     };
