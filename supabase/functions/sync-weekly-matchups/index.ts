@@ -10,7 +10,7 @@ import {
   getSeasonById,
   type Season,
 } from '../_shared/season-utils.ts';
-import { syncPlayoffBrackets } from '../sync-playoff-brackets/index.ts';
+import { syncPlayoffBrackets } from '../_shared/playoff-brackets.ts';
 
 interface RequestBody {
   week?: number;
