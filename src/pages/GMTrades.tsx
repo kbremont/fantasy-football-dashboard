@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase, authReady } from '@/lib/supabase'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -88,7 +88,7 @@ const POSITION_COLORS: Record<string, string> = {
 
 function parseAddsDrops(
   adds: Record<string, number> | null,
-  drops: Record<string, number> | null,
+  _drops: Record<string, number> | null,
   rosterIds: number[],
   playerMap: Map<string, PlayerInfo>
 ): { teamA: PlayerInfo[]; teamB: PlayerInfo[] } {
@@ -211,9 +211,6 @@ function calculateTradeStats(
 }
 
 function getTradePreview(trade: TradeDisplay): string {
-  const teamAItems = trade.teamA.receivedPlayers.length + trade.teamA.receivedPicks.length
-  const teamBItems = trade.teamB.receivedPlayers.length + trade.teamB.receivedPicks.length
-
   const formatSide = (players: number, picks: number) => {
     const parts: string[] = []
     if (players > 0) parts.push(`${players} player${players > 1 ? 's' : ''}`)
@@ -322,6 +319,9 @@ export function GMTrades() {
   useEffect(() => {
     if (!selectedSeasonId) return
 
+    // Capture non-null value for async closure
+    const seasonId = selectedSeasonId
+
     async function fetchTrades() {
       setLoading(true)
       setError(null)
@@ -332,7 +332,7 @@ export function GMTrades() {
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
           .select('*')
-          .eq('season_id', selectedSeasonId)
+          .eq('season_id', seasonId)
           .eq('type', 'trade')
           .order('week', { ascending: false })
 
@@ -369,7 +369,7 @@ export function GMTrades() {
 
         // Get season year
         const seasonYear =
-          seasons.find((s) => s.id === selectedSeasonId)?.season_year || 0
+          seasons.find((s) => s.id === seasonId)?.season_year || 0
 
         // Transform transactions to TradeDisplay
         const tradeDisplays: TradeDisplay[] = transactionsData
@@ -429,8 +429,6 @@ export function GMTrades() {
 
     fetchTrades()
   }, [selectedSeasonId, seasons, rosters])
-
-  const selectedSeason = seasons.find((s) => s.id === selectedSeasonId)
 
   return (
     <div className="space-y-8">
